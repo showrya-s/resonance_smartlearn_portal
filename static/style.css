@@ -1,0 +1,25 @@
+body {
+    font-family: Arial;
+    background: #eef6f8;
+}
+
+.header {
+    background: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.login-box {
+    width: 300px;
+    margin: 60px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+input, select, button {
+    width: 100%;
+    margin: 8px 0;
+    padding: 8px;
+}
