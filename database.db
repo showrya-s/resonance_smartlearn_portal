@@ -1,0 +1,42 @@
+-- students table
+CREATE TABLE students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    name TEXT,
+    class INTEGER,
+    section TEXT,
+    roll INTEGER,
+    attendance INTEGER,
+    photo TEXT
+);
+
+-- teachers table
+CREATE TABLE teachers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    name TEXT
+);
+
+-- marks table
+CREATE TABLE marks (
+    student_id INTEGER,
+    subject TEXT,
+    exam_type TEXT,   -- state / foundation
+    marks INTEGER
+);
+
+-- remarks
+CREATE TABLE remarks (
+    student_id INTEGER,
+    teacher_remark TEXT,
+    ai_remark TEXT
+);
+
+-- performance level
+CREATE TABLE performance (
+    student_id INTEGER,
+    subject TEXT,
+    level TEXT   -- Prodigy / Average / Improver
+);
