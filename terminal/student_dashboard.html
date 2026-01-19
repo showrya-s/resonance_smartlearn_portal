@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <img src="/static/logo.png" height="60">
+        <h2>Student Dashboard</h2>
+    </div>
+
+    <div class="card">
+        <h3>{{ student[0] }} (Class {{ student[1] }}-{{ student[2] }})</h3>
+        <p>Attendance: {{ student[3] }}%</p>
+    </div>
+
+    <div class="card">
+        <h3>Performance</h3>
+        <table border="1" cellpadding="8" cellspacing="0">
+            <tr>
+                <th>Subject</th>
+                <th>Level</th>
+            </tr>
+            {% for sub, level in performance %}
+            <tr>
+                <td>{{ sub }}</td>
+                <td>{{ level }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Remarks</h3>
+        <p><strong>Teacher:</strong> {{ remarks[0] if remarks else "No remarks yet" }}</p>
+        <p><strong>AI:</strong> {{ remarks[1] if remarks else "AI analysis pending" }}</p>
+    </div>
+
+    <a href="/chat"><button style="width:100%; padding:10px; margin-top:15px;">Chat with AI Tutor</button></a>
+</body>
+</html>
