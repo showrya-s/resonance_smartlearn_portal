@@ -1,23 +1,26 @@
+import os
 from flask import Flask, render_template, request, redirect, session
 import sqlite3
+from dotenv import load_dotenv
 import openai
 
+# ------------------ LOAD ENV ------------------
+load_dotenv()
+openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+# ------------------ FLASK SETUP ------------------
 app = Flask(__name__)
 app.secret_key = "resonance_secret_key"
-
-# ------------------ OPENAI SETUP ------------------
-openai.api_key = "YOUR_OPENAI_API_KEY"  # <- Replace with your key
 
 # ------------------ DATABASE CONNECTION ------------------
 def get_db():
     return sqlite3.connect("database.db")
 
-# ------------------ INIT DB ------------------
+# ------------------ DATABASE INIT ------------------
 @app.route("/init_db")
 def init_db():
     db = get_db()
     cur = db.cursor()
-
     cur.executescript("""
     CREATE TABLE IF NOT EXISTS students (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,7 +98,6 @@ def student_dashboard():
 
     db = get_db()
     cur = db.cursor()
-
     cur.execute("SELECT name, class, section, attendance FROM students WHERE id=?", (student_id,))
     student = cur.fetchone()
 
@@ -151,13 +153,12 @@ def student_profile(student_id):
         remarks=remarks
     )
 
-# ------------------ AI LOGIC ------------------
+# ------------------ AI ANALYSIS ------------------
 def ai_analysis(marks):
     if not marks:
-        return "No marks available for analysis."
+        return "No marks available to analyze."
 
     avg = sum(marks) / len(marks)
-
     if avg >= 85:
         return "Excellent performance. Prodigy level. Increase difficulty."
     elif avg >= 60:
@@ -165,42 +166,7 @@ def ai_analysis(marks):
     else:
         return "Needs improvement. Focus on basics with lower difficulty."
 
-# ------------------ UPDATE PERFORMANCE ------------------
-def update_performance(student_id):
-    db = get_db()
-    cur = db.cursor()
-
-    cur.execute("SELECT subject, marks FROM marks WHERE student_id=?", (student_id,))
-    subject_marks = cur.fetchall()
-
-    marks_list = []
-    for subject, mark in subject_marks:
-        marks_list.append(mark)
-        if mark >= 85:
-            level = "Prodigy"
-        elif mark >= 60:
-            level = "Average"
-        else:
-            level = "Improver"
-
-        # insert or update performance
-        cur.execute("""
-            INSERT INTO performance(student_id, subject, level)
-            VALUES (?, ?, ?)
-            ON CONFLICT(student_id, subject) DO UPDATE SET level=excluded.level
-        """, (student_id, subject, level))
-
-    db.commit()
-    ai_remark = ai_analysis(marks_list)
-
-    cur.execute("SELECT * FROM remarks WHERE student_id=?", (student_id,))
-    if cur.fetchone():
-        cur.execute("UPDATE remarks SET ai_remark=? WHERE student_id=?", (ai_remark, student_id))
-    else:
-        cur.execute("INSERT INTO remarks(student_id, ai_remark) VALUES (?, ?)", (student_id, ai_remark))
-    db.commit()
-
-# ------------------ AI HOMEWORK CHAT ------------------
+# ------------------ AI CHAT ------------------
 @app.route("/chat", methods=["GET", "POST"])
 def chat():
     response_text = ""
@@ -211,23 +177,34 @@ def chat():
     if request.method == "POST":
         question = request.form["question"]
 
+        # Fetch student performance to provide context
         db = get_db()
         cur = db.cursor()
         cur.execute("SELECT subject, level FROM performance WHERE student_id=?", (student_id,))
         performance = cur.fetchall()
-        perf_context = "\n".join([f"{sub}: {lvl}" for sub, lvl in performance]) or "No performance data yet."
+        perf_context = "\n".join([f"{sub}: {lvl}" for sub, lvl in performance])
 
-        prompt = f"You are a helpful AI tutor. Student performance:\n{perf_context}\n\nStudent asks: {question}\nExplain thoroughly with formulas, steps, and methods. Do not give shortcuts."
+        prompt = f"You are a helpful AI tutor. Student performance:\n{perf_context}\n\nStudent asks: {question}\nExplain thoroughly with formulas and methods."
 
-        res = openai.ChatCompletion.create(
-            model="gpt-5-mini",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=500
-        )
-        response_text = res['choices'][0]['message']['content']
+        try:
+            res = openai.ChatCompletion.create(
+                model="gpt-5-mini",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=500
+            )
+            response_text = res['choices'][0]['message']['content']
+        except Exception as e:
+            response_text = f"AI chat failed: {e}"
 
     return render_template("chat.html", response=response_text)
 
+# ------------------ LOGOUT ------------------
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
 # ------------------ RUN APP ------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
