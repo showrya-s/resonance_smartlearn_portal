@@ -1,61 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Student Profile</title>
-  <link rel="stylesheet" href="/static/style.css">
-
-  <!-- Firebase Script -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abcdef"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-  </script>
-
-  <style>
-    body { font-family: Arial; background:#eef6f8; margin:0; padding:0; }
-    .header { position: sticky; top:0; background:#fff; padding:15px; display:flex; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); z-index:10;}
-    .header img { height:50px; margin-right:15px; }
-    .container { padding:20px; max-width:1200px; margin:auto; }
-    .card { background:#fff; padding:20px; margin-bottom:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.05); }
-    table { width:100%; border-collapse: collapse; }
-    table th, table td { padding:12px; border-bottom:1px solid #ccc; text-align:left; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Profile</title>
+<link rel="stylesheet" href="/static/style.css">
+<script type="module" src="/static/style.js"></script>
 </head>
 <body>
-  <div class="header">
-    <img src="/static/logo.png" alt="Logo">
-    <h2>{{ student.name }} Profile</h2>
-    <a href="/teacher_dashboard" style="margin-left:auto;color:#007bff;">Back</a>
-  </div>
 
-  <div class="container">
-    <div class="card">
-      <h3>Details</h3>
-      <p><strong>Class:</strong> {{ student.class }} - {{ student.section }}</p>
-      <p><strong>Attendance:</strong> {{ student.attendance }}%</p>
+<div class="header">
+  <img src="/static/logo.png" alt="Logo">
+  <h2>Student Profile</h2>
+  <div class="nav">
+    <a href="/student">Dashboard</a>
+    <a href="/chat">AI Chat</a>
+    <a href="/">Logout</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <section class="profile-overview">
+    <div class="profile-card">
+      <img src="/static/logo.png" alt="Profile Photo" class="profile-photo">
+      <h3>Riya Sharma</h3>
+      <p>Class: 10 | Section: A | Roll: 1</p>
+      <p>Attendance: 95%</p>
     </div>
 
-    <div class="card">
-      <h3>Performance</h3>
-      <table>
-        <tr><th>Subject</th><th>Level</th></tr>
-        {% for subject, level in performance.items() %}
-        <tr><td>{{ subject }}</td><td>{{ level }}</td></tr>
-        {% endfor %}
-      </table>
+    <div class="performance-summary">
+      <h3>Subject Performance</h3>
+      <div class="card">
+        <h4>Math</h4>
+        <p>Level: Prodigy</p>
+        <p>Marks: 95/100</p>
+      </div>
+      <div class="card">
+        <h4>Science</h4>
+        <p>Level: Prodigy</p>
+        <p>Marks: 92/100</p>
+      </div>
+      <div class="card">
+        <h4>English</h4>
+        <p>Level: Average</p>
+        <p>Marks: 85/100</p>
+      </div>
+      <div class="card">
+        <h4>Social Science</h4>
+        <p>Level: Average</p>
+        <p>Marks: 88/100</p>
+      </div>
+      <div class="card">
+        <h4>Language</h4>
+        <p>Level: Prodigy</p>
+        <p>Marks: 93/100</p>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <section class="teacher-remarks">
+    <h3>Teacher Remarks</h3>
+    <div class="card">
+      <p>Keep up the good work in Math and Science. Focus on English grammar.</p>
+    </div>
+    <div class="card">
+      <p>Participates actively in class. Review Social Science chapters regularly.</p>
+    </div>
+  </section>
+
+  <section class="ai-remarks">
+    <h3>AI Analysis</h3>
+    <div class="card">
+      <p>Strong performance in Math and Science. Maintain practice for weak areas in English.</p>
+    </div>
+  </section>
+
+  <section class="attendance-trends">
+    <h3>Attendance Trends</h3>
+    <div class="card">
+      <p>January: 100%</p>
+      <p>February: 95%</p>
+      <p>March: 92%</p>
+      <p>April: 97%</p>
+      <p>May: 95%</p>
+    </div>
+  </section>
+
+  <section class="study-resources">
+    <h3>Quick Study Resources</h3>
+    <div class="card">Formulas Sheet PDF</div>
+    <div class="card">Science Notes PDF</div>
+    <div class="card">Previous Year Papers</div>
+    <div class="card">Video Tutorials</div>
+    <div class="card">Mind Maps & Flashcards</div>
+    <div class="card">Interactive Quizzes</div>
+    <div class="card">Exam Strategies</div>
+    <div class="card">Important Definitions</div>
+    <div class="card">Tips from Toppers</div>
+    <div class="card">Extra Practice Exercises</div>
+  </section>
+
+  <section class="extracurricular">
+    <h3>Achievements & Activities</h3>
+    <div class="card">Math Olympiad 2025 - Gold</div>
+    <div class="card">Science Fair 2025 - 2nd Place</div>
+    <div class="card">Debate Competition 2025 - Participant</div>
+    <div class="card">School Football Team Captain</div>
+    <div class="card">Art Exhibition - Winner</div>
+  </section>
+
+  <section class="upcoming-tasks">
+    <h3>Upcoming Homework & Tasks</h3>
+    <ul>
+      <li>Math Assignment Chapter 7 - Due: 25 Jan</li>
+      <li>Science Project on Motion - Due: 28 Jan</li>
+      <li>English Essay on Environment - Due: 30 Jan</li>
+      <li>Social Science Map Work - Due: 26 Jan</li>
+      <li>Language Practice Sheet - Due: 27 Jan</li>
+    </ul>
+  </section>
+
+</div>
+
+<div class="footer">
+  &copy; 2026 Resonance Portal. All rights reserved.
+</div>
+
 </body>
 </html>
