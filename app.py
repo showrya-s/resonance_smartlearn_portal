@@ -1,154 +1,109 @@
 import os
 from flask import Flask, render_template, request, redirect, session, jsonify
-import firebase_admin
-from firebase_admin import credentials, auth, firestore
 import openai
-from datetime import datetime
 
 # ------------------ CONFIG ------------------
-# Your OpenAI API key (already set in Render environment variables)
-openai.api_key = os.environ.get("OPENAI_API_KEY")
-
-# Initialize Firebase Admin
-cred = credentials.Certificate("firebase-admin.json")  # Place your downloaded Firebase Admin JSON here
-firebase_admin.initialize_app(cred)
-
-db = firestore.client()  # Firestore client
-
-# Flask setup
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersecretkey")
+app.secret_key = "resonance_secret_key"
 
-# ------------------ HELPERS ------------------
+# ------------------ OPENAI ------------------
+# Your API key directly here for Render deployment
+openai.api_key = "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"
 
-def get_user(uid):
-    """Fetch user info from Firestore"""
-    doc = db.collection("users").document(uid).get()
-    if doc.exists:
-        return doc.to_dict()
-    return None
+# ------------------ DUMMY USERS ------------------
+students = [
+    {"id": 1, "username": "student1", "password": "stud123", "name": "Riya Sharma", "class": 10, "section": "A", "roll": 1, "attendance": 95},
+    {"id": 2, "username": "student2", "password": "stud123", "name": "Arjun Mehta", "class": 10, "section": "B", "roll": 2, "attendance": 90}
+]
 
-def get_performance(uid):
-    """Fetch student performance"""
-    perf_doc = db.collection("performance").document(uid).get()
-    if perf_doc.exists:
-        return perf_doc.to_dict()
-    return {}
+teachers = [
+    {"id": 1, "username": "teacher1", "password": "teach123", "name": "Ms. Ananya Sharma"},
+    {"id": 2, "username": "teacher2", "password": "teach123", "name": "Mr. Rakesh Verma"}
+]
 
-def ai_response(message, student_name="Student"):
-    """Call OpenAI API to respond dynamically"""
-    try:
-        prompt = f"""
-        You are an educational AI assistant for a student named {student_name}.
-        Answer their questions concisely and explain formulas and methods clearly.
-        Student asks: {message}
-        """
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "system", "content": "You are a helpful AI tutor."},
-                      {"role": "user", "content": prompt}],
-            temperature=0.6,
-            max_tokens=400
-        )
-        return response['choices'][0]['message']['content'].strip()
-    except Exception as e:
-        return f"AI Error: {str(e)}"
-
-# ------------------ ROUTES ------------------
-
-# ---- LOGIN ----
+# ------------------ LOGIN ------------------
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
-        role = request.form.get("role")  # 'student' or 'teacher'
+        username = request.form["username"]
+        password = request.form["password"]
+        role = request.form["role"]
 
-        try:
-            user = auth.get_user_by_email(email)
-            session["uid"] = user.uid
-            session["role"] = role
-            return redirect(f"/{role}_dashboard")
-        except:
-            return render_template("login.html", error="Invalid email or password")
+        if role == "student":
+            user = next((s for s in students if s["username"] == username and s["password"] == password), None)
+            if user:
+                session["student_id"] = user["id"]
+                return redirect("/student")
+        else:
+            user = next((t for t in teachers if t["username"] == username and t["password"] == password), None)
+            if user:
+                session["teacher_id"] = user["id"]
+                return redirect("/teacher")
 
     return render_template("login.html")
 
-# ---- STUDENT DASHBOARD ----
-@app.route("/student_dashboard")
+# ------------------ STUDENT DASHBOARD ------------------
+@app.route("/student")
 def student_dashboard():
-    uid = session.get("uid")
-    if not uid or session.get("role") != "student":
+    student_id = session.get("student_id")
+    if not student_id:
         return redirect("/")
 
-    user = get_user(uid)
-    performance = get_performance(uid)
-    return render_template("student_dashboard.html", user=user, performance=performance)
+    student = next((s for s in students if s["id"] == student_id), None)
+    return render_template("student_dashboard.html", student=student)
 
-# ---- TEACHER DASHBOARD ----
-@app.route("/teacher_dashboard")
+# ------------------ STUDENT PROFILE ------------------
+@app.route("/student_profile")
+def student_profile():
+    student_id = session.get("student_id")
+    if not student_id:
+        return redirect("/")
+
+    student = next((s for s in students if s["id"] == student_id), None)
+    return render_template("student_profile.html", student=student)
+
+# ------------------ TEACHER DASHBOARD ------------------
+@app.route("/teacher")
 def teacher_dashboard():
-    uid = session.get("uid")
-    if not uid or session.get("role") != "teacher":
+    teacher_id = session.get("teacher_id")
+    if not teacher_id:
         return redirect("/")
 
-    # List all students
-    students = [doc.to_dict() for doc in db.collection("users").where("role", "==", "student").stream()]
-    return render_template("teacher_dashboard.html", teacher=get_user(uid), students=students)
+    return render_template("teacher_dashboard.html", students=students)
 
-# ---- STUDENT PROFILE ----
-@app.route("/student_profile/<student_uid>")
-def student_profile(student_uid):
-    uid = session.get("uid")
-    if not uid or session.get("role") != "teacher":
+# ------------------ AI CHAT ------------------
+@app.route("/chat")
+def chat_page():
+    student_id = session.get("student_id")
+    if not student_id:
         return redirect("/")
+    return render_template("chat.html")
 
-    student = get_user(student_uid)
-    performance = get_performance(student_uid)
-    return render_template("student_profile.html", student=student, performance=performance)
+@app.route("/api/chat", methods=["POST"])
+def chat_api():
+    data = request.get_json()
+    prompt = data.get("prompt", "")
 
-# ---- CHAT ----
-@app.route("/chat", methods=["GET", "POST"])
-def chat():
-    uid = session.get("uid")
-    if not uid:
-        return redirect("/")
+    if not prompt:
+        return jsonify({"response": "Please ask a question!"})
 
-    user = get_user(uid)
+    try:
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.6,
+            max_tokens=500
+        )
+        answer = completion.choices[0].message.content.strip()
+        return jsonify({"response": answer})
+    except Exception as e:
+        return jsonify({"response": f"AI Error: {str(e)}"})
 
-    if request.method == "POST":
-        message = request.form.get("message")
-        response = ai_response(message, student_name=user.get("name", "Student"))
-
-        # Save chat in Firestore
-        db.collection("chats").document(uid).collection("messages").add({
-            "role": "student",
-            "message": message,
-            "timestamp": datetime.utcnow()
-        })
-        db.collection("chats").document(uid).collection("messages").add({
-            "role": "ai",
-            "message": response,
-            "timestamp": datetime.utcnow()
-        })
-
-        return jsonify({"response": response})
-
-    # GET → render chat page
-    # Fetch previous chat messages
-    messages = []
-    chat_docs = db.collection("chats").document(uid).collection("messages").order_by("timestamp").stream()
-    for msg in chat_docs:
-        messages.append(msg.to_dict())
-
-    return render_template("chat.html", user=user, messages=messages)
-
-# ---- LOGOUT ----
+# ------------------ LOGOUT ------------------
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect("/")
 
-# ------------------ RUN ------------------
 if __name__ == "__main__":
     app.run(debug=True)
