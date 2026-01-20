@@ -1,102 +1,124 @@
 import os
-from flask import Flask, render_template, request, redirect, session
-import openai
+from flask import Flask, render_template, request, redirect, session, url_for
+from openai import OpenAI
 
-# ------------------ OPENAI SETUP ------------------
-openai.api_key = os.environ.get("OPENAI_API_KEY")
-
-# ------------------ FLASK SETUP ------------------
+# -----------------------------
+# FLASK SETUP
+# -----------------------------
 app = Flask(__name__)
 app.secret_key = "resonance_secret_key"
 
-# ------------------ FAKE DATA LAYER (IN-MEMORY) ------------------
+# -----------------------------
+# OPENAI CLIENT (REAL AI)
+# -----------------------------
+client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY")
+)
 
-students = {
+# -----------------------------
+# DEMO USERS (NO DATABASE)
+# -----------------------------
+STUDENTS = {
     "student1": {
         "password": "stud123",
-        "name": "Aarav Mehta",
-        "class": 9,
+        "name": "Aarav Patel",
+        "class": "9",
         "section": "A",
-        "roll": 12,
-        "attendance": 92,
-        "photo": "logo.png",
-        "marks": {
-            "Maths": 55,
-            "Science": 78,
-            "English": 81,
-            "Social Science": 60,
-            "Language": 74,
-            "Physics": 58,
-            "Chemistry": 65,
-            "Biology": 88
-        }
+        "attendance": 92
     }
 }
 
-teachers = {
+TEACHERS = {
     "teacher1": {
         "password": "teach123",
         "name": "Ms. Ananya Sharma"
     }
 }
 
-# ------------------ AI LOGIC ------------------
+# -----------------------------
+# STUDENT PERFORMANCE LEVELS
+# -----------------------------
+STUDENT_LEVELS = {
+    "student1": "Average"  # Improver / Average / Prodigy
+}
 
-def performance_level(score):
-    if score >= 85:
-        return "🟢 Prodigy"
-    elif score >= 60:
-        return "🟡 Average"
-    else:
-        return "🔴 Improver"
+# -----------------------------
+# CHAT MEMORY (SESSION BASED)
+# -----------------------------
+CHAT_MEMORY = {}
 
-def generate_ai_remark(subject, score):
-    prompt = f"""
-    A student scored {score}/100 in {subject}.
-    Explain their performance and suggest improvement methods.
-    Avoid shortcuts.
-    """
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return response.choices[0].message.content
-    except:
-        return "AI service unavailable. Try again later."
+# -----------------------------
+# HELPER FUNCTIONS
+# -----------------------------
+def detect_subject(message):
+    msg = message.lower()
 
-# ------------------ ROUTES ------------------
+    if any(w in msg for w in ["math", "algebra", "geometry", "equation", "pythagoras"]):
+        return "Mathematics"
+    if any(w in msg for w in ["physics", "force", "motion", "velocity"]):
+        return "Physics"
+    if any(w in msg for w in ["chemistry", "reaction", "acid", "base"]):
+        return "Chemistry"
+    if any(w in msg for w in ["biology", "cell", "photosynthesis", "plant"]):
+        return "Biology"
 
+    return "General"
+
+
+def difficulty_instruction(level):
+    if level == "Improver":
+        return "Use very simple language, basic examples, and slow explanations."
+    if level == "Prodigy":
+        return "Use deeper reasoning and slightly challenging explanations."
+    return "Explain clearly with examples and standard difficulty."
+
+
+# -----------------------------
+# LOGIN
+# -----------------------------
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        role = request.form["role"]
+        username = request.form.get("username")
+        password = request.form.get("password")
+        role = request.form.get("role")
 
-        if role == "student" and username in students:
-            if students[username]["password"] == password:
-                session["user"] = username
+        if role == "student":
+            user = STUDENTS.get(username)
+            if user and user["password"] == password:
+                session.clear()
                 session["role"] = "student"
-                return redirect("/student-dashboard")
+                session["username"] = username
+                return redirect(url_for("student_dashboard"))
 
-        if role == "teacher" and username in teachers:
-            if teachers[username]["password"] == password:
-                session["user"] = username
+        if role == "teacher":
+            user = TEACHERS.get(username)
+            if user and user["password"] == password:
+                session.clear()
                 session["role"] = "teacher"
-                return redirect("/teacher-dashboard")
+                session["username"] = username
+                return redirect(url_for("teacher_dashboard"))
+
+        return render_template("login.html", error="Invalid credentials")
 
     return render_template("login.html")
 
-@app.route("/student-dashboard")
+
+# -----------------------------
+# STUDENT DASHBOARD
+# -----------------------------
+@app.route("/student")
 def student_dashboard():
     if session.get("role") != "student":
-        return redirect("/")
+        return redirect(url_for("login"))
 
-    student = students[session["user"]]
+    student = STUDENTS.get(session["username"])
+
     performance = {
-        subject: performance_level(score)
-        for subject, score in student["marks"].items()
+        "Maths": "Average",
+        "Science": "Prodigy",
+        "English": "Average",
+        "Biology": "Improver"
     }
 
     return render_template(
@@ -105,51 +127,131 @@ def student_dashboard():
         performance=performance
     )
 
-@app.route("/teacher-dashboard")
-def teacher_dashboard():
-    if session.get("role") != "teacher":
-        return redirect("/")
 
-    return render_template(
-        "teacher_dashboard.html",
-        students=students
+# -----------------------------
+# STUDENT PROFILE
+# -----------------------------
+@app.route("/profile")
+def student_profile():
+    if session.get("role") != "student":
+        return redirect(url_for("login"))
+
+    student = STUDENTS.get(session["username"])
+
+    marks = {
+        "Maths": 68,
+        "Science": 91,
+        "English": 74,
+        "Biology": 55
+    }
+
+    ai_remark = (
+        "Strong conceptual understanding in Science. "
+        "Biology fundamentals need reinforcement. "
+        "Maths accuracy will improve with regular practice."
     )
 
-@app.route("/student/<username>")
-def student_profile(username):
-    if session.get("role") != "teacher":
-        return redirect("/")
-
-    student = students[username]
-    ai_remarks = {
-        subject: generate_ai_remark(subject, score)
-        for subject, score in student["marks"].items()
-    }
+    teacher_remark = (
+        "Disciplined student. Should participate more actively in class."
+    )
 
     return render_template(
         "student_profile.html",
         student=student,
-        ai_remarks=ai_remarks,
-        performance=student["marks"]
+        marks=marks,
+        ai_remark=ai_remark,
+        teacher_remark=teacher_remark
     )
 
-@app.route("/ai-chat", methods=["POST"])
-def ai_chat():
-    question = request.form["question"]
 
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a helpful AI tutor."},
-                {"role": "user", "content": question}
-            ]
-        )
-        return response.choices[0].message.content
-    except:
-        return "AI service unavailable."
+# -----------------------------
+# AI CHAT (REAL OPENAI)
+# -----------------------------
+@app.route("/chat", methods=["GET", "POST"])
+def chat():
+    if session.get("role") != "student":
+        return redirect(url_for("login"))
 
-# ------------------ RUN ------------------
+    username = session.get("username")
+    ai_response = None
 
+    if username not in CHAT_MEMORY:
+        CHAT_MEMORY[username] = []
+
+    if request.method == "POST":
+        user_message = request.form.get("message", "").strip()
+
+        if user_message:
+            subject = detect_subject(user_message)
+            level = STUDENT_LEVELS.get(username, "Average")
+            difficulty_note = difficulty_instruction(level)
+
+            system_prompt = (
+                f"You are an AI tutor for school students (Classes 6–10).\n"
+                f"Subject: {subject}\n"
+                f"Student level: {level}\n"
+                f"{difficulty_note}\n"
+                f"Explain concepts step by step.\n"
+                f"Focus on methods and reasoning.\n"
+                f"Never give shortcuts or final exam answers."
+            )
+
+            messages = [{"role": "system", "content": system_prompt}]
+            messages.extend(CHAT_MEMORY[username][-6:])
+            messages.append({"role": "user", "content": user_message})
+
+            try:
+                completion = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=messages,
+                    temperature=0.35,
+                    max_tokens=450
+                )
+
+                ai_response = completion.choices[0].message.content
+
+                CHAT_MEMORY[username].append(
+                    {"role": "user", "content": user_message}
+                )
+                CHAT_MEMORY[username].append(
+                    {"role": "assistant", "content": ai_response}
+                )
+
+            except Exception:
+                ai_response = (
+                    "The AI tutor is temporarily unavailable. "
+                    "Please try again shortly."
+                )
+
+    return render_template("chat.html", ai_response=ai_response)
+
+
+# -----------------------------
+# TEACHER DASHBOARD
+# -----------------------------
+@app.route("/teacher")
+def teacher_dashboard():
+    if session.get("role") != "teacher":
+        return redirect(url_for("login"))
+
+    return render_template(
+        "teacher_dashboard.html",
+        students=STUDENTS,
+        levels=STUDENT_LEVELS
+    )
+
+
+# -----------------------------
+# LOGOUT
+# -----------------------------
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
+# -----------------------------
+# RUN
+# -----------------------------
 if __name__ == "__main__":
     app.run(debug=True)
