@@ -1,59 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Profile</title>
+    <title>My Profile</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="header">
-        <img src="/static/logo.png" height="60">
+
+<div class="header">
+    <img src="/static/logo.png">
+    <div class="nav">
+        <a href="/student">Dashboard</a>
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="card">
         <h2>Student Profile</h2>
+        <p><b>Name:</b> Demo Student</p>
+        <p><b>Class:</b> 10-A</p>
+        <p><b>Roll No:</b> 23</p>
     </div>
 
     <div class="card">
-        <h3>{{ student[0] }} (Class {{ student[1] }}-{{ student[2] }})</h3>
-        <p>Roll No: {{ student[3] }}</p>
-        <p>Attendance: {{ student[4] }}%</p>
+        <h3>Academic Summary</h3>
+        <p>Performance Level: Improving 📈</p>
     </div>
 
-    <div class="card">
-        <h3>Marks</h3>
-        <table border="1" cellpadding="8" cellspacing="0">
-            <tr>
-                <th>Subject</th>
-                <th>Exam Type</th>
-                <th>Marks</th>
-            </tr>
-            {% for subject, exam_type, marks in marks %}
-            <tr>
-                <td>{{ subject }}</td>
-                <td>{{ exam_type }}</td>
-                <td>{{ marks }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
+    <div class="spacer"></div>
+</div>
 
-    <div class="card">
-        <h3>Performance Levels</h3>
-        <table border="1" cellpadding="8" cellspacing="0">
-            <tr>
-                <th>Subject</th>
-                <th>Level</th>
-            </tr>
-            {% for subject, level in performance %}
-            <tr>
-                <td>{{ subject }}</td>
-                <td>{{ level }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-
-    <div class="card">
-        <h3>Remarks</h3>
-        <p><strong>Teacher:</strong> {{ remarks[0] if remarks else "No remarks yet" }}</p>
-        <p><strong>AI:</strong> {{ remarks[1] if remarks else "AI analysis pending" }}</p>
-    </div>
 </body>
 </html>
