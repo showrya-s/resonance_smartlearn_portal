@@ -40,7 +40,7 @@ if (loginForm) {
         body: JSON.stringify({ email, role })
       });
 
-      window.location.href = "/student_dashboard";
+      window.location.href = "/student";
     } catch (err) {
       alert("Login failed: " + err.message);
     }
