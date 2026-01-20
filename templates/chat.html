@@ -1,114 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Chat</title>
-<link rel="stylesheet" href="/static/style.css">
-<script type="module" src="/static/style.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student AI Chat - Resonance Portal</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+
+    <!-- Custom JS -->
+    <script type="module" src="/static/style.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <img src="/static/logo.png" alt="Resonance Logo" class="logo">
+        <h1>Student AI Chat</h1>
+    </header>
 
-<div class="header">
-  <img src="/static/logo.png" alt="Logo">
-  <h2>AI Homework Chat</h2>
-  <div class="nav">
-    <a href="/student">Dashboard</a>
-    <a href="/student_profile">Profile</a>
-    <a href="/">Logout</a>
-  </div>
-</div>
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="chat-container">
+        <!-- User Info -->
+        <section class="user-info card">
+            <h2>Welcome, Student!</h2>
+            <p>Use this chat to ask questions about homework, formulas, or methods.</p>
+        </section>
 
-<div class="container">
+        <!-- Chat Area -->
+        <section class="chat-window card">
+            <div id="chat-history" class="chat-history">
+                <!-- Messages will appear here dynamically -->
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="message-input" placeholder="Type your question here...">
+                <button id="send-btn">Send</button>
+            </div>
+        </section>
 
-  <div class="chat-panel">
-    <h3>Chat with AI</h3>
-    <div class="chat-history">
-      <div class="message ai-message">Hello! Ask me anything about your homework or formulas.</div>
-      <div class="message student-message">Hi AI! Explain Pythagoras theorem.</div>
+        <!-- Tips / Info -->
+        <section class="tips card">
+            <h3>Chat Tips:</h3>
+            <ul>
+                <li>Ask about any subject: Maths, Science, English.</li>
+                <li>Use full questions to get better AI answers.</li>
+                <li>Press Enter or click Send to submit your question.</li>
+                <li>All your chats are saved in real-time.</li>
+            </ul>
+        </section>
+
+        <!-- Sample Formulas -->
+        <section class="formulas card">
+            <h3>Sample Formulas:</h3>
+            <p>Pythagorean Theorem: a² + b² = c²</p>
+            <p>Quadratic Formula: x = [-b ± √(b²-4ac)] / 2a</p>
+            <p>Area of Circle: π × r²</p>
+        </section>
+
+        <!-- Chat Info Card -->
+        <section class="chat-info card">
+            <h3>Chat Info</h3>
+            <p>The AI replies immediately and stores your questions in Firebase.</p>
+            <p>Feel free to ask multiple questions and revise homework answers.</p>
+        </section>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer card">
+        <p>© 2026 Resonance Portal. All Rights Reserved.</p>
+        <p>Powered by Firebase & OpenAI GPT-3.5-Turbo</p>
+    </footer>
+
+    <!-- ==================== ADDITIONAL ELEMENTS ==================== -->
+    <div class="debug card">
+        <h4>Debug Info</h4>
+        <p>Chat connected: <span id="chat-status">Not connected</span></p>
+        <p>Last AI response: <span id="last-response">N/A</span></p>
     </div>
 
-    <div class="chat-input">
-      <input type="text" placeholder="Type your question here">
-      <button class="button">Send</button>
-    </div>
-  </div>
+    <section class="history-log card">
+        <h4>Chat History Log</h4>
+        <p>The chat history is stored and loaded in real-time from Firebase Firestore.</p>
+    </section>
 
-  <div class="suggestions-panel">
-    <h3>Suggested Topics</h3>
-    <ul>
-      <li>Math formulas</li>
-      <li>Science experiments</li>
-      <li>Biology diagrams</li>
-      <li>Physics derivations</li>
-      <li>Chemistry reactions</li>
-      <li>Social Science notes</li>
-      <li>English grammar tips</li>
-      <li>Study strategies</li>
-      <li>Previous year questions</li>
-      <li>Exam preparation tips</li>
-    </ul>
-  </div>
+    <section class="extra-info card">
+        <h4>Extra Notes</h4>
+        <ul>
+            <li>Always type clearly for better AI understanding.</li>
+            <li>You can review previous questions in the chat window.</li>
+            <li>Chat supports multi-line questions; press Enter to send.</li>
+        </ul>
+    </section>
 
-  <div class="resources-panel">
-    <h3>Quick Resources</h3>
-    <div class="card">
-      <h4>Math PDF</h4>
-      <p>Download formulas sheet for faster revision.</p>
-      <button class="button">Download</button>
-    </div>
-    <div class="card">
-      <h4>Science Notes</h4>
-      <p>Quick notes for Physics, Chemistry, Biology.</p>
-      <button class="button">View</button>
-    </div>
-    <div class="card">
-      <h4>Exam Tips</h4>
-      <p>Time management and practice strategies.</p>
-      <button class="button">Read</button>
-    </div>
-    <div class="card">
-      <h4>Video Tutorials</h4>
-      <p>Watch step-by-step solutions.</p>
-      <button class="button">Play</button>
-    </div>
-    <div class="card">
-      <h4>Previous Papers</h4>
-      <p>Practice questions from last 5 years.</p>
-      <button class="button">Download</button>
-    </div>
-  </div>
+    <section class="instructions card">
+        <h4>Instructions</h4>
+        <ol>
+            <li>Open the chat page.</li>
+            <li>Type your question.</li>
+            <li>Press Send or Enter.</li>
+            <li>Wait for AI response.</li>
+            <li>Review answer and ask follow-ups if needed.</li>
+        </ol>
+    </section>
 
-  <div class="faq-panel">
-    <h3>Frequently Asked Questions</h3>
-    <ul>
-      <li>How to solve quadratic equations?</li>
-      <li>Tips for memorizing formulas?</li>
-      <li>How to improve weak subjects?</li>
-      <li>What is AI adaptive learning?</li>
-      <li>How to track performance?</li>
-      <li>How to access teacher remarks?</li>
-      <li>How to download study material?</li>
-      <li>Best time to study for exams?</li>
-      <li>How to use the chat effectively?</li>
-      <li>How to track attendance?</li>
-    </ul>
-  </div>
-
-  <div class="additional-resources">
-    <h3>Extra Resources</h3>
-    <div class="card">Mind maps for chapters</div>
-    <div class="card">Flashcards for formulas</div>
-    <div class="card">Interactive quizzes</div>
-    <div class="card">Important definitions</div>
-    <div class="card">Tips from toppers</div>
-  </div>
-
-</div>
-
-<div class="footer">
-  &copy; 2026 Resonance Portal. All rights reserved.
-</div>
-
+    <section class="footer-notes card">
+        <h4>Footer Notes</h4>
+        <p>This chat system is part of the Resonance Smart Learning Portal.</p>
+        <p>All questions are securely stored in Firebase Firestore.</p>
+    </section>
 </body>
 </html>
