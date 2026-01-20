@@ -40,7 +40,7 @@ if (loginForm) {
         body: JSON.stringify({ email, role })
       });
 
-      window.location.href = "/chat-page";
+      window.location.href = "/student_dashboard";
     } catch (err) {
       alert("Login failed: " + err.message);
     }
