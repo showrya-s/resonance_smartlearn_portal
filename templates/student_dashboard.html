@@ -1,42 +1,196 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Dashboard</title>
+    <meta charset="UTF-8">
+    <title>Student Dashboard | Resonance SmartLearn</title>
     <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .student-card {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .student-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .student-info h2 {
+            margin: 0;
+            color: #1e3a8a;
+        }
+
+        .student-info p {
+            margin: 4px 0;
+            color: #475569;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+        }
+
+        .remark-box {
+            background: #f1f5f9;
+            border-left: 6px solid #2563eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .ai-box {
+            border-left-color: #9333ea;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 13px;
+            color: #64748b;
+        }
+    </style>
 </head>
+
 <body>
-    <div class="header">
-        <img src="/static/logo.png" height="60">
-        <h2>Student Dashboard</h2>
+
+<div class="header">
+    <img src="/static/logo.png" height="45">
+    <h2>Resonance SmartLearn</h2>
+</div>
+
+<div class="container">
+
+    <!-- STUDENT PROFILE -->
+    <div class="card dashboard-header">
+        <div class="student-card">
+            <div class="student-avatar">
+                {{ student[0][0] }}
+            </div>
+
+            <div class="student-info">
+                <h2>{{ student[0] }}</h2>
+                <p>Class {{ student[1] }}{{ student[2] }}</p>
+                <p>Attendance: {{ student[3] }}%</p>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ student[3] }}%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <span class="badge green">Active Student</span>
+        </div>
     </div>
 
+    <!-- PERFORMANCE + REMARKS -->
+    <div class="grid">
+
+        <!-- SUBJECT PERFORMANCE -->
+        <div class="card">
+            <h3 class="section-title">Subject-wise Performance</h3>
+
+            <table class="table">
+                <tr>
+                    <th>Subject</th>
+                    <th>Level</th>
+                </tr>
+
+                {% for subject, level in performance %}
+                <tr>
+                    <td>{{ subject }}</td>
+                    <td>
+                        {% if level == 'Improver' %}
+                            <span class="badge red">Improver</span>
+                        {% elif level == 'Average' %}
+                            <span class="badge yellow">Average</span>
+                        {% else %}
+                            <span class="badge green">Prodigy</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- REMARKS -->
+        <div class="card">
+            <h3 class="section-title">Insights & Guidance</h3>
+
+            <div class="remark-box">
+                <strong>Teacher Remark</strong>
+                <p>{{ remarks[0] }}</p>
+            </div>
+
+            <div class="remark-box ai-box">
+                <strong>AI Learning Assistant</strong>
+                <p>{{ remarks[1] }}</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FUTURE AI SECTION -->
     <div class="card">
-        <h3>{{ student[0] }} (Class {{ student[1] }}-{{ student[2] }})</h3>
-        <p>Attendance: {{ student[3] }}%</p>
+        <h3 class="section-title">AI Homework Assistant</h3>
+        <p>
+            Ask questions about homework, concepts, formulas, or methods.
+            The AI adapts explanations based on your performance level.
+        </p>
+
+        <input type="text" placeholder="Ask your doubt here (coming soon)">
+        <button disabled style="margin-top:10px; background:#94a3b8;">
+            AI Chat (Enabled Soon)
+        </button>
     </div>
 
-    <div class="card">
-        <h3>Performance</h3>
-        <table border="1" cellpadding="8" cellspacing="0">
-            <tr>
-                <th>Subject</th>
-                <th>Level</th>
-            </tr>
-            {% for sub, level in performance %}
-            <tr>
-                <td>{{ sub }}</td>
-                <td>{{ level }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+    <div class="footer-note">
+        © 2026 Resonance SmartLearn • Adaptive AI Learning Platform
     </div>
 
-    <div class="card">
-        <h3>Remarks</h3>
-        <p><strong>Teacher:</strong> {{ remarks[0] if remarks else "No remarks yet" }}</p>
-        <p><strong>AI:</strong> {{ remarks[1] if remarks else "AI analysis pending" }}</p>
-    </div>
+</div>
 
-    <a href="/chat"><button style="width:100%; padding:10px; margin-top:15px;">Chat with AI Tutor</button></a>
 </body>
 </html>
+
