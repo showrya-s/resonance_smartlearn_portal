@@ -1,115 +1,594 @@
-/* ===================== GENERAL STYLING ===================== */
-* { box-sizing: border-box; margin:0; padding:0; font-family: 'Poppins', sans-serif; }
-body { background: linear-gradient(145deg,#eef6f8,#dfeef5); color:#333; line-height:1.5; }
-a { text-decoration:none; color:#007bff; transition:0.3s; }
-a:hover { color:#0056b3; }
+/* ==================== BASE STYLING ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
 
-/* ===================== HEADER ===================== */
+body {
+    background: #eef6f8;
+    color: #333;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* ==================== HEADER ==================== */
 .header {
-  position: sticky;
-  top:0;
-  z-index:1000;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  background:#fff;
-  padding:15px 25px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    background: linear-gradient(90deg, #0066ff, #00ccff);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+    z-index: 999;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
-.header img { height:50px; margin-right:15px; }
-.header h2 { font-weight:700; color:#007bff; font-size:1.5rem; }
-.header .nav { display:flex; gap:15px; }
-.header .nav a { font-weight:600; }
 
-/* ===================== BUTTONS ===================== */
-.button {
-  display:inline-block;
-  padding:10px 18px;
-  background:#007bff;
-  color:#fff;
-  border-radius:8px;
-  border:none;
-  cursor:pointer;
-  transition:0.3s;
+.header img {
+    height: 50px;
+    margin-right: 15px;
 }
-.button:hover { background:#0056b3; transform: translateY(-2px); }
-.button:active { transform: translateY(0); }
 
-/* ===================== CARDS ===================== */
-.card {
-  background:#fff;
-  padding:25px;
-  margin-bottom:20px;
-  border-radius:12px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.05);
-  transition:transform 0.3s, box-shadow 0.3s;
+.header h2 {
+    font-size: 24px;
+    font-weight: 700;
 }
-.card:hover { transform: translateY(-5px); box-shadow:0 10px 30px rgba(0,0,0,0.1); }
-.card h3 { color:#007bff; margin-bottom:15px; font-size:1.3rem; }
 
-/* ===================== TABLES ===================== */
-.table-wrapper { overflow-x:auto; }
-table { width:100%; border-collapse: collapse; margin-bottom:10px; }
-th, td { text-align:left; padding:12px; border-bottom:1px solid #ddd; }
-tr:hover { background:#f1f9ff; }
-
-/* ===================== FORM INPUTS ===================== */
-input, select, textarea {
-  width:100%;
-  padding:12px;
-  margin:10px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:1rem;
-  transition:0.3s;
-}
-input:focus, select:focus, textarea:focus { border-color:#007bff; outline:none; }
-
-/* ===================== LOGIN BOX ===================== */
+/* ==================== LOGIN BOX ==================== */
 .login-box {
-  width:400px;
-  max-width:90%;
-  margin:120px auto;
-  background:#fff;
-  padding:40px 30px;
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.15);
-  transition: transform 0.3s;
-}
-.login-box:hover { transform: translateY(-5px); }
-
-/* ===================== FOOTER ===================== */
-.footer {
-  text-align:center;
-  padding:20px;
-  font-size:0.9rem;
-  color:#777;
-  margin-top:30px;
+    width: 350px;
+    margin: 80px auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    animation: fadeIn 1s ease;
 }
 
-/* ===================== CHAT BOX ===================== */
+.login-box input,
+.login-box select,
+.login-box button {
+    width: 100%;
+    margin: 12px 0;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+.login-box button {
+    background: #0066ff;
+    color: #fff;
+    border: none;
+    transition: background 0.3s ease;
+}
+
+.login-box button:hover {
+    background: #004ecc;
+}
+
+/* ==================== DASHBOARD ==================== */
+.dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    background: #fff;
+    padding: 20px;
+    flex: 1 1 300px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.card h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 16px;
+    color: #555;
+}
+
+/* ==================== TABLES ==================== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+th {
+    background: #0066ff;
+    color: #fff;
+}
+
+tr:nth-child(even) {
+    background: #f3f9ff;
+}
+
+/* ==================== CHAT ==================== */
 .chat-container {
-  display:flex;
-  flex-direction:column;
-  max-width:800px;
-  margin:20px auto;
-  background:#fff;
-  border-radius:12px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.05);
-  padding:20px;
-  height:500px;
-  overflow-y:auto;
+    display: flex;
+    flex-direction: column;
+    max-width: 700px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
-.chat-message { margin:8px 0; padding:12px; border-radius:12px; max-width:70%; }
-.chat-message.student { background:#007bff; color:#fff; align-self:flex-end; }
-.chat-message.ai { background:#f1f1f1; color:#333; align-self:flex-start; }
-.chat-input { display:flex; gap:10px; margin-top:10px; }
-.chat-input input { flex:1; }
-.chat-input button { width:100px; }
 
-/* ===================== RESPONSIVE ===================== */
-@media (max-width:768px){
-  .header { flex-direction:column; align-items:flex-start; gap:10px; }
-  .login-box { margin:60px auto; padding:30px 20px; }
-  .chat-container { height:350px; }
+.chat-history {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background: #f7faff;
 }
+
+.message {
+    padding: 10px;
+    border-radius: 8px;
+    margin: 6px 0;
+    width: fit-content;
+    max-width: 70%;
+}
+
+.student-message {
+    background: #cce5ff;
+    align-self: flex-end;
+}
+
+.ai-message {
+    background: #e2ffe2;
+    align-self: flex-start;
+}
+
+.chat-input {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.chat-input button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    background: #0066ff;
+    color: #fff;
+    transition: background 0.3s ease;
+}
+
+.chat-input button:hover {
+    background: #004ecc;
+}
+
+/* ==================== PROFILE ==================== */
+.profile {
+    max-width: 700px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.profile img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #0066ff;
+    margin-bottom: 15px;
+}
+
+.profile h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.profile p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+/* ==================== BUTTONS ==================== */
+.btn {
+    padding: 10px 20px;
+    background: #0066ff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+.btn:hover {
+    background: #004ecc;
+}
+
+/* ==================== PROGRESS BARS ==================== */
+.progress-bar {
+    background: #f3f9ff;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 10px 0;
+    height: 20px;
+}
+
+.progress-bar-inner {
+    height: 100%;
+    background: #0066ff;
+    width: 50%;
+    transition: width 0.5s ease;
+}
+
+/* ==================== BADGES ==================== */
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 12px;
+    background: #0066ff;
+    color: #fff;
+    font-size: 14px;
+}
+
+/* ==================== MODALS ==================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+@keyframes slideIn {
+    from {transform: translateX(-100%);}
+    to {transform: translateX(0);}
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media screen and (max-width: 768px) {
+    .dashboard {
+        flex-direction: column;
+    }
+
+    .card {
+        flex: 1 1 100%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .login-box {
+        width: 90%;
+        padding: 20px;
+    }
+
+    .profile {
+        padding: 20px;
+    }
+}
+
+/* ==================== EXTRA UI ELEMENTS ==================== */
+/* Scrollbar styling */
+.chat-history::-webkit-scrollbar {
+    width: 10px;
+}
+
+.chat-history::-webkit-scrollbar-thumb {
+    background: #0066ff;
+    border-radius: 6px;
+}
+
+.chat-history::-webkit-scrollbar-track {
+    background: #f3f9ff;
+}
+
+/* Hover effects for table rows */
+table tr:hover {
+    background: #d9f0ff;
+    transition: 0.3s;
+}
+
+/* Links */
+a.btn-link {
+    color: #0066ff;
+    font-weight: bold;
+}
+
+a.btn-link:hover {
+    color: #004ecc;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 20px;
+    background: #f3f9ff;
+    margin-top: 40px;
+    font-size: 14px;
+    color: #555;
+}
+/* ==================== ADDITIONAL COLORS ==================== */
+.bg-primary { background: #0066ff; color: #fff; }
+.bg-secondary { background: #00ccff; color: #fff; }
+.bg-success { background: #28a745; color: #fff; }
+.bg-warning { background: #ffc107; color: #fff; }
+.bg-danger { background: #dc3545; color: #fff; }
+
+.text-primary { color: #0066ff; }
+.text-secondary { color: #00ccff; }
+.text-success { color: #28a745; }
+.text-warning { color: #ffc107; }
+.text-danger { color: #dc3545; }
+
+/* ==================== ADDITIONAL CARD VARIATIONS ==================== */
+.card-primary { border-top: 5px solid #0066ff; }
+.card-secondary { border-top: 5px solid #00ccff; }
+.card-success { border-top: 5px solid #28a745; }
+.card-warning { border-top: 5px solid #ffc107; }
+.card-danger { border-top: 5px solid #dc3545; }
+
+/* ==================== BUTTON VARIATIONS ==================== */
+.btn-primary { background: #0066ff; color: #fff; }
+.btn-secondary { background: #00ccff; color: #fff; }
+.btn-success { background: #28a745; color: #fff; }
+.btn-warning { background: #ffc107; color: #fff; }
+.btn-danger { background: #dc3545; color: #fff; }
+
+.btn-primary:hover { background: #004ecc; }
+.btn-secondary:hover { background: #0099cc; }
+.btn-success:hover { background: #218838; }
+.btn-warning:hover { background: #e0a800; }
+.btn-danger:hover { background: #c82333; }
+
+/* ==================== INPUT STATES ==================== */
+input:focus, select:focus, textarea:focus {
+    border-color: #0066ff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0,102,255,0.5);
+}
+
+/* ==================== ADDITIONAL TABLE STYLING ==================== */
+table th {
+    background: linear-gradient(45deg, #0066ff, #00ccff);
+    color: #fff;
+}
+
+table td {
+    padding: 14px;
+    font-size: 15px;
+}
+
+table tr:hover {
+    background: #cce5ff;
+    transition: all 0.3s ease;
+}
+
+table caption {
+    caption-side: top;
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #0066ff;
+}
+
+/* ==================== CHAT VARIATIONS ==================== */
+.ai-message-alt {
+    background: #d1f0d1;
+    border-left: 4px solid #28a745;
+}
+
+.student-message-alt {
+    background: #b3d1ff;
+    border-right: 4px solid #0066ff;
+}
+
+/* ==================== MODAL VARIATIONS ==================== */
+.modal-success .modal-content { border-top: 5px solid #28a745; }
+.modal-warning .modal-content { border-top: 5px solid #ffc107; }
+.modal-danger .modal-content { border-top: 5px solid #dc3545; }
+
+/* ==================== ADDITIONAL PROGRESS BARS ==================== */
+.progress-bar-primary .progress-bar-inner { background: #0066ff; }
+.progress-bar-success .progress-bar-inner { background: #28a745; }
+.progress-bar-warning .progress-bar-inner { background: #ffc107; }
+.progress-bar-danger .progress-bar-inner { background: #dc3545; }
+
+/* ==================== BADGE VARIATIONS ==================== */
+.badge-primary { background: #0066ff; }
+.badge-secondary { background: #00ccff; }
+.badge-success { background: #28a745; }
+.badge-warning { background: #ffc107; }
+.badge-danger { background: #dc3545; }
+
+/* ==================== SHADOWS ==================== */
+.shadow-sm { box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.shadow-md { box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+.shadow-lg { box-shadow: 0 12px 30px rgba(0,0,0,0.2); }
+
+/* ==================== SPACING UTILITIES ==================== */
+.m-0 { margin: 0; }
+.m-1 { margin: 5px; }
+.m-2 { margin: 10px; }
+.m-3 { margin: 15px; }
+.m-4 { margin: 20px; }
+.m-5 { margin: 25px; }
+.p-0 { padding: 0; }
+.p-1 { padding: 5px; }
+.p-2 { padding: 10px; }
+.p-3 { padding: 15px; }
+.p-4 { padding: 20px; }
+.p-5 { padding: 25px; }
+
+/* ==================== FLEX UTILITIES ==================== */
+.flex { display: flex; }
+.flex-column { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.align-center { align-items: center; }
+.align-start { align-items: flex-start; }
+.align-end { align-items: flex-end; }
+.gap-1 { gap: 5px; }
+.gap-2 { gap: 10px; }
+.gap-3 { gap: 15px; }
+
+/* ==================== EXTRA UI ELEMENTS ==================== */
+.card-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.card-group .card {
+    flex: 1 1 250px;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.alert-primary { background: #0066ff; }
+.alert-success { background: #28a745; }
+.alert-warning { background: #ffc107; color: #333; }
+.alert-danger { background: #dc3545; }
+
+/* ==================== HEADER NAV ==================== */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: linear-gradient(90deg,#0066ff,#00ccff);
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.navbar a {
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.3s ease;
+}
+
+.navbar a:hover { background: rgba(255,255,255,0.2); }
+
+/* ==================== FOOTER ==================== */
+.footer {
+    background: #f3f9ff;
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+}
+
+/* ==================== MEDIA QUERIES ==================== */
+@media screen and (max-width: 1024px) {
+    .dashboard { flex-direction: column; }
+    .card { flex: 1 1 100%; }
+}
+
+@media screen and (max-width: 480px) {
+    .login-box { width: 90%; padding: 15px; }
+    .profile { padding: 15px; }
+}
+
+/* ==================== SCROLLBAR ==================== */
+.chat-history::-webkit-scrollbar { width: 10px; }
+.chat-history::-webkit-scrollbar-thumb { background: #0066ff; border-radius: 6px; }
+.chat-history::-webkit-scrollbar-track { background: #f3f9ff; }
+
+/* ==================== ANIMATION VARIANTS ==================== */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%);}
+    to { transform: translateX(0);}
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%);}
+    to { transform: translateX(0);}
+}
+
+/* ==================== EXTRA UTILITIES ==================== */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+.rounded { border-radius: 12px; }
+.rounded-sm { border-radius: 6px; }
+.shadow-hover:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.2); transition: 0.3s; }
+.opacity-75 { opacity: 0.75; }
+.opacity-50 { opacity: 0.5; }
+.opacity-25 { opacity: 0.25; }
+
+/* ==================== END OF STYLE ==================== */
