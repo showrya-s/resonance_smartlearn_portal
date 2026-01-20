@@ -1,71 +1,72 @@
 import os
-import sqlite3
 from flask import Flask, render_template, request, redirect, session
 import openai
 
-# ------------------ OPENAI CONFIG ------------------
+# ------------------ OPENAI SETUP ------------------
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 # ------------------ FLASK SETUP ------------------
 app = Flask(__name__)
 app.secret_key = "resonance_secret_key"
 
-# ------------------ DATABASE CONNECTION ------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "database.db")
+# ------------------ FAKE DATA LAYER (IN-MEMORY) ------------------
 
-def get_db():
-    return sqlite3.connect(DB_PATH)
+students = {
+    "student1": {
+        "password": "stud123",
+        "name": "Aarav Mehta",
+        "class": 9,
+        "section": "A",
+        "roll": 12,
+        "attendance": 92,
+        "photo": "logo.png",
+        "marks": {
+            "Maths": 55,
+            "Science": 78,
+            "English": 81,
+            "Social Science": 60,
+            "Language": 74,
+            "Physics": 58,
+            "Chemistry": 65,
+            "Biology": 88
+        }
+    }
+}
 
+teachers = {
+    "teacher1": {
+        "password": "teach123",
+        "name": "Ms. Ananya Sharma"
+    }
+}
 
-# ------------------ DATABASE INIT ------------------
-@app.route("/init_db")
-def init_db():
-    db = get_db()
-    cur = db.cursor()
-    cur.executescript("""
-    CREATE TABLE IF NOT EXISTS students (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
-        password TEXT,
-        name TEXT,
-        class INTEGER,
-        section TEXT,
-        roll INTEGER,
-        attendance INTEGER,
-        photo TEXT
-    );
+# ------------------ AI LOGIC ------------------
 
-    CREATE TABLE IF NOT EXISTS teachers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
-        password TEXT,
-        name TEXT
-    );
+def performance_level(score):
+    if score >= 85:
+        return "🟢 Prodigy"
+    elif score >= 60:
+        return "🟡 Average"
+    else:
+        return "🔴 Improver"
 
-    CREATE TABLE IF NOT EXISTS marks (
-        student_id INTEGER,
-        subject TEXT,
-        exam_type TEXT,
-        marks INTEGER
-    );
+def generate_ai_remark(subject, score):
+    prompt = f"""
+    A student scored {score}/100 in {subject}.
+    Explain their performance and suggest improvement methods.
+    Avoid shortcuts.
+    """
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+    except:
+        return "AI service unavailable. Try again later."
 
-    CREATE TABLE IF NOT EXISTS remarks (
-        student_id INTEGER,
-        teacher_remark TEXT,
-        ai_remark TEXT
-    );
+# ------------------ ROUTES ------------------
 
-    CREATE TABLE IF NOT EXISTS performance (
-        student_id INTEGER,
-        subject TEXT,
-        level TEXT
-    );
-    """)
-    db.commit()
-    return "Database initialized!"
-
-# ------------------ LOGIN ------------------
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -73,141 +74,82 @@ def login():
         password = request.form["password"]
         role = request.form["role"]
 
-        db = get_db()
-        cur = db.cursor()
+        if role == "student" and username in students:
+            if students[username]["password"] == password:
+                session["user"] = username
+                session["role"] = "student"
+                return redirect("/student-dashboard")
 
-        if role == "student":
-            cur.execute("SELECT * FROM students WHERE username=? AND password=?", (username, password))
-            user = cur.fetchone()
-            if user:
-                session["student_id"] = user[0]
-                return redirect("/student")
-        else:
-            cur.execute("SELECT * FROM teachers WHERE username=? AND password=?", (username, password))
-            user = cur.fetchone()
-            if user:
-                session["teacher"] = True
-                return redirect("/teacher")
+        if role == "teacher" and username in teachers:
+            if teachers[username]["password"] == password:
+                session["user"] = username
+                session["role"] = "teacher"
+                return redirect("/teacher-dashboard")
 
     return render_template("login.html")
 
-# ------------------ STUDENT DASHBOARD ------------------
-@app.route("/student")
+@app.route("/student-dashboard")
 def student_dashboard():
-    student_id = session.get("student_id")
-    if not student_id:
+    if session.get("role") != "student":
         return redirect("/")
 
-    db = get_db()
-    cur = db.cursor()
-    cur.execute("SELECT name, class, section, attendance FROM students WHERE id=?", (student_id,))
-    student = cur.fetchone()
-
-    cur.execute("SELECT subject, level FROM performance WHERE student_id=?", (student_id,))
-    performance = cur.fetchall()
-
-    cur.execute("SELECT teacher_remark, ai_remark FROM remarks WHERE student_id=?", (student_id,))
-    remarks = cur.fetchone()
+    student = students[session["user"]]
+    performance = {
+        subject: performance_level(score)
+        for subject, score in student["marks"].items()
+    }
 
     return render_template(
         "student_dashboard.html",
         student=student,
-        performance=performance,
-        remarks=remarks
+        performance=performance
     )
 
-# ------------------ TEACHER DASHBOARD ------------------
-@app.route("/teacher")
+@app.route("/teacher-dashboard")
 def teacher_dashboard():
-    if not session.get("teacher"):
+    if session.get("role") != "teacher":
         return redirect("/")
 
-    db = get_db()
-    cur = db.cursor()
-    cur.execute("SELECT id, name, class, section FROM students")
-    students = cur.fetchall()
+    return render_template(
+        "teacher_dashboard.html",
+        students=students
+    )
 
-    return render_template("teacher_dashboard.html", students=students)
+@app.route("/student/<username>")
+def student_profile(username):
+    if session.get("role") != "teacher":
+        return redirect("/")
 
-# ------------------ STUDENT PROFILE ------------------
-@app.route("/student_profile/<int:student_id>")
-def student_profile(student_id):
-    db = get_db()
-    cur = db.cursor()
-
-    cur.execute("SELECT name, class, section, roll, attendance FROM students WHERE id=?", (student_id,))
-    student = cur.fetchone()
-
-    cur.execute("SELECT subject, exam_type, marks FROM marks WHERE student_id=?", (student_id,))
-    marks = cur.fetchall()
-
-    cur.execute("SELECT subject, level FROM performance WHERE student_id=?", (student_id,))
-    performance = cur.fetchall()
-
-    cur.execute("SELECT teacher_remark, ai_remark FROM remarks WHERE student_id=?", (student_id,))
-    remarks = cur.fetchone()
+    student = students[username]
+    ai_remarks = {
+        subject: generate_ai_remark(subject, score)
+        for subject, score in student["marks"].items()
+    }
 
     return render_template(
         "student_profile.html",
         student=student,
-        marks=marks,
-        performance=performance,
-        remarks=remarks
+        ai_remarks=ai_remarks,
+        performance=student["marks"]
     )
 
-# ------------------ AI ANALYSIS ------------------
-def ai_analysis(marks):
-    if not marks:
-        return "No marks available to analyze."
+@app.route("/ai-chat", methods=["POST"])
+def ai_chat():
+    question = request.form["question"]
 
-    avg = sum(marks) / len(marks)
-    if avg >= 85:
-        return "Excellent performance. Prodigy level. Increase difficulty."
-    elif avg >= 60:
-        return "Good performance. Maintain practice and improve weak areas."
-    else:
-        return "Needs improvement. Focus on basics with lower difficulty."
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a helpful AI tutor."},
+                {"role": "user", "content": question}
+            ]
+        )
+        return response.choices[0].message.content
+    except:
+        return "AI service unavailable."
 
-# ------------------ AI CHAT ------------------
-@app.route("/chat", methods=["GET", "POST"])
-def chat():
-    response_text = ""
-    student_id = session.get("student_id")
-    if not student_id:
-        return redirect("/")
+# ------------------ RUN ------------------
 
-    if request.method == "POST":
-        question = request.form["question"]
-
-        # Fetch student performance to provide context
-        db = get_db()
-        cur = db.cursor()
-        cur.execute("SELECT subject, level FROM performance WHERE student_id=?", (student_id,))
-        performance = cur.fetchall()
-        perf_context = "\n".join([f"{sub}: {lvl}" for sub, lvl in performance])
-
-        prompt = f"You are a helpful AI tutor. Student performance:\n{perf_context}\n\nStudent asks: {question}\nExplain thoroughly with formulas and methods."
-
-        try:
-            res = openai.ChatCompletion.create(
-                model="gpt-5-mini",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=500
-            )
-            response_text = res['choices'][0]['message']['content']
-        except Exception as e:
-            response_text = f"AI chat failed: {e}"
-
-    return render_template("chat.html", response=response_text)
-
-# ------------------ LOGOUT ------------------
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/")
-
-# ------------------ RUN APP ------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
-
+    app.run(debug=True)
