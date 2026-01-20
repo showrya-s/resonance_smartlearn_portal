@@ -1,7 +1,7 @@
-// ------------------- Firebase Initialization -------------------
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+// ---------------- FIREBASE ----------------
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyApDMmuJhsTuzlfK0zxZZbl1VEjdPp4FM8",
@@ -14,88 +14,63 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ------------------- Firebase Login -------------------
+// ---------------- LOGIN ----------------
 const loginForm = document.getElementById("login-form");
+
 if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
 
-    // In Firebase, authenticate user (dummy example, replace with your auth)
-    // Here we assume the user exists in Firestore collection "users"
+    const email = loginForm.email.value;
+    const password = loginForm.password.value;
+
     try {
-      const docRef = doc(db, "users", email);
-      const docSnap = await getDoc(docRef);
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      const uid = userCred.user.uid;
 
-      if (!docSnap.exists()) {
-        document.getElementById("error-msg").innerText = "User not found!";
-        return;
-      }
+      const snap = await getDoc(doc(db, "users", email));
+      const role = snap.exists() ? snap.data().role : "student";
 
-      const user = docSnap.data();
+      await fetch("/set-session", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ email, role })
+      });
 
-      // Simple password check (for demo, you can use Firebase Auth later)
-      if (user.password !== password) {
-        document.getElementById("error-msg").innerText = "Incorrect password!";
-        return;
-      }
-
-      // Redirect based on role
-      if (user.role === "student") {
-        window.location.href = "/student_dashboard";
-      } else if (user.role === "teacher") {
-        window.location.href = "/teacher_dashboard";
-      } else {
-        document.getElementById("error-msg").innerText = "Unknown role!";
-      }
-
+      window.location.href = "/chat-page";
     } catch (err) {
-      document.getElementById("error-msg").innerText = "Login error!";
-      console.error(err);
+      alert("Login failed: " + err.message);
     }
   });
 }
 
-// ------------------- Chat Functionality Hook -------------------
+// ---------------- CHAT ----------------
 const chatForm = document.getElementById("chat-form");
-const chatInput = document.getElementById("chat-input");
 const chatBox = document.getElementById("chat-box");
+const chatInput = document.getElementById("chat-input");
 
 if (chatForm) {
   chatForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const message = chatInput.value.trim();
-    if (!message) return;
 
-    // Display user message
-    chatBox.innerHTML += `<div class="user-msg">You: ${message}</div>`;
+    const msg = chatInput.value.trim();
+    if (!msg) return;
+
+    chatBox.innerHTML += `<div class="msg user">🧑 ${msg}</div>`;
     chatInput.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Placeholder for OpenAI call (server-side)
-    try {
-      const response = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message })
-      });
-      const data = await response.json();
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ message: msg })
+    });
 
-      chatBox.innerHTML += `<div class="ai-msg">AI: ${data.reply}</div>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
-    } catch (err) {
-      chatBox.innerHTML += `<div class="ai-msg">AI: Error connecting to server.</div>`;
-    }
+    const data = await res.json();
+    chatBox.innerHTML += `<div class="msg ai">🤖 ${data.reply}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
   });
 }
-
-// ------------------- Optional UI Enhancements -------------------
-window.addEventListener("scroll", () => {
-  const header = document.querySelector(".header");
-  if (header) {
-    header.style.boxShadow = window.scrollY > 0 ? "0 4px 10px rgba(0,0,0,0.2)" : "none";
-  }
-});
