@@ -5,21 +5,55 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="header">
-        <img src="/static/logo.png" height="60">
-        <h2>AI Homework Chat</h2>
+
+<div class="header">
+    <img src="/static/logo.png">
+    <div class="nav">
+        <a href="/student">Dashboard</a>
+        <a href="/chat">AI Chat</a>
+        <a href="/profile">Profile</a>
+        <a href="/logout">Logout</a>
     </div>
+</div>
 
-    <form method="post" class="card">
-        <textarea name="question" placeholder="Ask your question..." required style="width:100%;height:80px;"></textarea>
-        <button type="submit">Ask AI</button>
-    </form>
+<div class="container">
 
-    {% if response %}
     <div class="card">
-        <h3>AI Answer:</h3>
-        <p>{{ response }}</p>
+        <h2>AI Homework Assistant 🤖</h2>
+        <p>
+            Ask questions about homework, formulas, methods,
+            or concepts. The AI explains the *method*, not shortcuts.
+        </p>
     </div>
-    {% endif %}
+
+    <div class="card">
+        <div class="chat-box">
+            <!-- Example messages -->
+            <div class="message ai">
+                Hello! What topic are you studying today?
+            </div>
+
+            <div class="message user">
+                Explain Pythagoras theorem.
+            </div>
+
+            <div class="message ai">
+                Sure! Let’s break it down step by step…
+            </div>
+        </div>
+
+        <form method="POST" action="/chat">
+            <input
+                name="message"
+                placeholder="Type your question here..."
+                required
+            >
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <div class="spacer"></div>
+</div>
+
 </body>
 </html>
