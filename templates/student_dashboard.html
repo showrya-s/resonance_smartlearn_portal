@@ -2,195 +2,300 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Dashboard | Resonance SmartLearn</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>SmartLearn • Student Dashboard</title>
 
     <style>
-        body {
-            background: linear-gradient(135deg, #eef2ff, #f8fafc);
-        }
-
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .student-card {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .student-avatar {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #2563eb, #1e40af);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            font-weight: bold;
-        }
-
-        .student-info h2 {
+        /* -------------------- RESET -------------------- */
+        * {
             margin: 0;
-            color: #1e3a8a;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .student-info p {
-            margin: 4px 0;
-            color: #475569;
+        body {
+            background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+            min-height: 100vh;
+            color: #ffffff;
         }
 
-        .grid {
+        /* -------------------- NAVBAR -------------------- */
+        .navbar {
+            height: 70px;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        .navbar h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #00eaff;
+            letter-spacing: 1px;
+        }
+
+        .navbar span {
+            font-size: 15px;
+            opacity: 0.8;
+        }
+
+        /* -------------------- MAIN LAYOUT -------------------- */
+        .container {
+            padding: 40px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 3fr;
+            gap: 30px;
+        }
+
+        /* -------------------- PROFILE CARD -------------------- */
+        .profile-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+        }
+
+        .profile-card img {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 4px solid #00eaff;
+            margin-bottom: 20px;
+        }
+
+        .profile-card h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .profile-card p {
+            font-size: 14px;
+            opacity: 0.85;
+            margin-bottom: 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            background: linear-gradient(90deg, #00eaff, #00ff9d);
+            color: #000;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        /* -------------------- DASHBOARD CONTENT -------------------- */
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* -------------------- STATS ROW -------------------- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 25px;
         }
 
-        .progress-bar {
-            height: 10px;
-            background: #e5e7eb;
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .stat-card h3 {
+            font-size: 16px;
+            opacity: 0.85;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h1 {
+            font-size: 36px;
+            color: #00ffcc;
+        }
+
+        /* -------------------- SUBJECT GRID -------------------- */
+        .subjects {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .subject-card {
+            background: rgba(255,255,255,0.08);
             border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+            position: relative;
             overflow: hidden;
-            margin-top: 6px;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #22c55e, #16a34a);
+        .subject-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.12));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .remark-box {
-            background: #f1f5f9;
-            border-left: 6px solid #2563eb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 12px;
+        .subject-card:hover::before {
+            opacity: 1;
         }
 
-        .ai-box {
-            border-left-color: #9333ea;
-        }
-
-        .section-title {
+        .subject-card h3 {
             font-size: 18px;
-            margin-bottom: 15px;
-            color: #1e293b;
+            margin-bottom: 12px;
         }
 
-        .footer-note {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 13px;
-            color: #64748b;
+        .subject-card p {
+            font-size: 14px;
+            opacity: 0.85;
+            margin-bottom: 10px;
         }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00eaff, #00ff9d);
+            border-radius: 50px;
+        }
+
+        /* -------------------- AI ASSISTANT -------------------- */
+        .ai-box {
+            background: linear-gradient(135deg, rgba(0,234,255,0.25), rgba(0,255,157,0.25));
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.45);
+        }
+
+        .ai-box h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .ai-box p {
+            font-size: 15px;
+            opacity: 0.9;
+            margin-bottom: 18px;
+        }
+
+        .ai-box button {
+            background: #000;
+            color: #00ffcc;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ai-box button:hover {
+            background: #00ffcc;
+            color: #000;
+        }
+
+        /* -------------------- FOOTER -------------------- */
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 13px;
+            opacity: 0.6;
+        }
+
     </style>
 </head>
 
 <body>
 
-<div class="header">
-    <img src="/static/logo.png" height="45">
-    <h2>Resonance SmartLearn</h2>
-</div>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <h1>SmartLearn AI</h1>
+        <span>Student Portal</span>
+    </div>
 
-<div class="container">
+    <!-- MAIN -->
+    <div class="container">
 
-    <!-- STUDENT PROFILE -->
-    <div class="card dashboard-header">
-        <div class="student-card">
-            <div class="student-avatar">
-                {{ student[0][0] }}
-            </div>
+        <!-- PROFILE -->
+        <div class="profile-card">
+            <img src="{{ url_for('static', filename=student.photo) }}">
+            <h2>{{ student.name }}</h2>
+            <p>Class {{ student.class }} • Section {{ student.section }}</p>
+            <p>Roll No: {{ student.roll }}</p>
+            <div class="badge">Attendance {{ student.attendance }}%</div>
+        </div>
 
-            <div class="student-info">
-                <h2>{{ student[0] }}</h2>
-                <p>Class {{ student[1] }}{{ student[2] }}</p>
-                <p>Attendance: {{ student[3] }}%</p>
+        <!-- DASHBOARD -->
+        <div class="dashboard">
 
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: {{ student[3] }}%;"></div>
+            <!-- STATS -->
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Total Subjects</h3>
+                    <h1>{{ student.marks|length }}</h1>
+                </div>
+                <div class="stat-card">
+                    <h3>Average Score</h3>
+                    <h1>
+                        {{
+                        (student.marks.values() | sum // student.marks|length)
+                        }}%
+                    </h1>
+                </div>
+                <div class="stat-card">
+                    <h3>Attendance</h3>
+                    <h1>{{ student.attendance }}%</h1>
                 </div>
             </div>
-        </div>
 
-        <div>
-            <span class="badge green">Active Student</span>
-        </div>
-    </div>
-
-    <!-- PERFORMANCE + REMARKS -->
-    <div class="grid">
-
-        <!-- SUBJECT PERFORMANCE -->
-        <div class="card">
-            <h3 class="section-title">Subject-wise Performance</h3>
-
-            <table class="table">
-                <tr>
-                    <th>Subject</th>
-                    <th>Level</th>
-                </tr>
-
-                {% for subject, level in performance %}
-                <tr>
-                    <td>{{ subject }}</td>
-                    <td>
-                        {% if level == 'Improver' %}
-                            <span class="badge red">Improver</span>
-                        {% elif level == 'Average' %}
-                            <span class="badge yellow">Average</span>
-                        {% else %}
-                            <span class="badge green">Prodigy</span>
-                        {% endif %}
-                    </td>
-                </tr>
+            <!-- SUBJECTS -->
+            <div class="subjects">
+                {% for subject, score in student.marks.items() %}
+                <div class="subject-card">
+                    <h3>{{ subject }}</h3>
+                    <p>Score: {{ score }}/100</p>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: {{ score }}%"></div>
+                    </div>
+                </div>
                 {% endfor %}
-            </table>
-        </div>
-
-        <!-- REMARKS -->
-        <div class="card">
-            <h3 class="section-title">Insights & Guidance</h3>
-
-            <div class="remark-box">
-                <strong>Teacher Remark</strong>
-                <p>{{ remarks[0] }}</p>
             </div>
 
-            <div class="remark-box ai-box">
-                <strong>AI Learning Assistant</strong>
-                <p>{{ remarks[1] }}</p>
+            <!-- AI -->
+            <div class="ai-box">
+                <h2>AI Learning Assistant</h2>
+                <p>Get instant explanations, study plans, and concept clarity powered by AI.</p>
+                <button>Ask AI Tutor</button>
             </div>
+
         </div>
-
     </div>
 
-    <!-- FUTURE AI SECTION -->
-    <div class="card">
-        <h3 class="section-title">AI Homework Assistant</h3>
-        <p>
-            Ask questions about homework, concepts, formulas, or methods.
-            The AI adapts explanations based on your performance level.
-        </p>
-
-        <input type="text" placeholder="Ask your doubt here (coming soon)">
-        <button disabled style="margin-top:10px; background:#94a3b8;">
-            AI Chat (Enabled Soon)
-        </button>
-    </div>
-
-    <div class="footer-note">
-        © 2026 Resonance SmartLearn • Adaptive AI Learning Platform
-    </div>
-
-</div>
+    <footer>
+        © 2026 SmartLearn AI • Designed for FA-2 Project Excellence
+    </footer>
 
 </body>
 </html>
-
