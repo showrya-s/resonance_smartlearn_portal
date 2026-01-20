@@ -1,83 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Chat</title>
-  <link rel="stylesheet" href="/static/style.css">
-
-  <!-- Firebase Script -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abcdef"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-  </script>
-
-  <style>
-    body { font-family: Arial; background:#eef6f8; margin:0; padding:0; display:flex; flex-direction:column; height:100vh;}
-    .header { position: sticky; top:0; background:#fff; padding:15px; display:flex; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); z-index:10;}
-    .header img { height:50px; margin-right:15px; }
-    .container { padding:20px; max-width:800px; margin:auto; flex:1; display:flex; flex-direction:column; }
-    .messages { flex:1; overflow-y:auto; background:#fff; padding:15px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.05); margin-bottom:15px;}
-    .message { margin-bottom:10px; }
-    .message.ai { color:#007bff; }
-    .message.user { color:#333; text-align:right; }
-    input, button { padding:10px; border-radius:5px; border:1px solid #ccc; margin-top:5px; }
-    button { background:#007bff; color:#fff; border:none; cursor:pointer; }
-    button:hover { background:#0056b3; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Chat</title>
+<link rel="stylesheet" href="/static/style.css">
+<script type="module" src="/static/style.js"></script>
 </head>
 <body>
-  <div class="header">
-    <img src="/static/logo.png" alt="Logo">
-    <h2>AI Chat</h2>
-    <a href="/student_dashboard" style="margin-left:auto;color:#007bff;">Back</a>
-  </div>
 
-  <div class="container">
-    <div class="messages" id="chat-box">
-      {% for msg in messages %}
-      <div class="message {{ msg.role }}">{{ msg.message }}</div>
-      {% endfor %}
+<div class="header">
+  <img src="/static/logo.png" alt="Logo">
+  <h2>AI Homework Chat</h2>
+  <div class="nav">
+    <a href="/student">Dashboard</a>
+    <a href="/student_profile">Profile</a>
+    <a href="/">Logout</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="chat-panel">
+    <h3>Chat with AI</h3>
+    <div class="chat-history">
+      <div class="message ai-message">Hello! Ask me anything about your homework or formulas.</div>
+      <div class="message student-message">Hi AI! Explain Pythagoras theorem.</div>
     </div>
 
-    <form id="chat-form">
-      <input type="text" id="message" placeholder="Ask your AI tutor..." required>
-      <button type="submit">Send</button>
-    </form>
+    <div class="chat-input">
+      <input type="text" placeholder="Type your question here">
+      <button class="button">Send</button>
+    </div>
   </div>
 
-  <script>
-    const form = document.getElementById("chat-form");
-    const messageInput = document.getElementById("message");
-    const chatBox = document.getElementById("chat-box");
+  <div class="suggestions-panel">
+    <h3>Suggested Topics</h3>
+    <ul>
+      <li>Math formulas</li>
+      <li>Science experiments</li>
+      <li>Biology diagrams</li>
+      <li>Physics derivations</li>
+      <li>Chemistry reactions</li>
+      <li>Social Science notes</li>
+      <li>English grammar tips</li>
+      <li>Study strategies</li>
+      <li>Previous year questions</li>
+      <li>Exam preparation tips</li>
+    </ul>
+  </div>
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const msg = messageInput.value;
-      chatBox.innerHTML += `<div class="message user">${msg}</div>`;
-      messageInput.value = "";
+  <div class="resources-panel">
+    <h3>Quick Resources</h3>
+    <div class="card">
+      <h4>Math PDF</h4>
+      <p>Download formulas sheet for faster revision.</p>
+      <button class="button">Download</button>
+    </div>
+    <div class="card">
+      <h4>Science Notes</h4>
+      <p>Quick notes for Physics, Chemistry, Biology.</p>
+      <button class="button">View</button>
+    </div>
+    <div class="card">
+      <h4>Exam Tips</h4>
+      <p>Time management and practice strategies.</p>
+      <button class="button">Read</button>
+    </div>
+    <div class="card">
+      <h4>Video Tutorials</h4>
+      <p>Watch step-by-step solutions.</p>
+      <button class="button">Play</button>
+    </div>
+    <div class="card">
+      <h4>Previous Papers</h4>
+      <p>Practice questions from last 5 years.</p>
+      <button class="button">Download</button>
+    </div>
+  </div>
 
-      const res = await fetch("/chat", {
-        method:"POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `message=${encodeURIComponent(msg)}`
-      });
+  <div class="faq-panel">
+    <h3>Frequently Asked Questions</h3>
+    <ul>
+      <li>How to solve quadratic equations?</li>
+      <li>Tips for memorizing formulas?</li>
+      <li>How to improve weak subjects?</li>
+      <li>What is AI adaptive learning?</li>
+      <li>How to track performance?</li>
+      <li>How to access teacher remarks?</li>
+      <li>How to download study material?</li>
+      <li>Best time to study for exams?</li>
+      <li>How to use the chat effectively?</li>
+      <li>How to track attendance?</li>
+    </ul>
+  </div>
 
-      const data = await res.json();
-      chatBox.innerHTML += `<div class="message ai">${data.response}</div>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
-    });
-  </script>
+  <div class="additional-resources">
+    <h3>Extra Resources</h3>
+    <div class="card">Mind maps for chapters</div>
+    <div class="card">Flashcards for formulas</div>
+    <div class="card">Interactive quizzes</div>
+    <div class="card">Important definitions</div>
+    <div class="card">Tips from toppers</div>
+  </div>
+
+</div>
+
+<div class="footer">
+  &copy; 2026 Resonance Portal. All rights reserved.
+</div>
+
 </body>
 </html>
