@@ -1,5 +1,8 @@
-// ------------------ Firebase Initialization ------------------
-// Make sure you included Firebase scripts in your HTML before this
+// ------------------- Firebase Initialization -------------------
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+
 const firebaseConfig = {
   apiKey: "AIzaSyApDMmuJhsTuzlfK0zxZZbl1VEjdPp4FM8",
   authDomain: "resonance-portal.firebaseapp.com",
@@ -10,67 +13,89 @@ const firebaseConfig = {
   measurementId: "G-Z599TEBV6R"
 };
 
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
 
-// ------------------ Login Form ------------------
+// ------------------- Firebase Login -------------------
 const loginForm = document.getElementById("login-form");
 if (loginForm) {
-  loginForm.addEventListener("submit", (e) => {
+  loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = loginForm["email"].value;
-    const password = loginForm["password"].value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-    // Firebase login
-    firebase.auth().signInWithEmailAndPassword(email, password)
-      .then(async (cred) => {
-        const uid = cred.user.uid;
+    // In Firebase, authenticate user (dummy example, replace with your auth)
+    // Here we assume the user exists in Firestore collection "users"
+    try {
+      const docRef = doc(db, "users", email);
+      const docSnap = await getDoc(docRef);
 
-        // Get role from Firestore
-        const doc = await db.collection("users").doc(uid).get();
-        if (!doc.exists) {
-          alert("User data not found!");
-          return;
-        }
-        const role = doc.data().role;
+      if (!docSnap.exists()) {
+        document.getElementById("error-msg").innerText = "User not found!";
+        return;
+      }
 
-        // Redirect based on role
-        if (role === "student") {
-          window.location.href = "student_dashboard.html";
-        } else if (role === "teacher") {
-          window.location.href = "teacher_dashboard.html";
-        } else {
-          alert("Unknown role!");
-        }
-      })
-      .catch((err) => {
-        alert(err.message);
-      });
-  });
-}
+      const user = docSnap.data();
 
-// ------------------ Logout Function ------------------
-const logoutBtn = document.getElementById("logout-btn");
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    firebase.auth().signOut().then(() => {
-      window.location.href = "login.html";
-    });
-  });
-}
+      // Simple password check (for demo, you can use Firebase Auth later)
+      if (user.password !== password) {
+        document.getElementById("error-msg").innerText = "Incorrect password!";
+        return;
+      }
 
-// ------------------ Auto Redirect if Logged In ------------------
-firebase.auth().onAuthStateChanged(async (user) => {
-  if (user) {
-    const doc = await db.collection("users").doc(user.uid).get();
-    if (!doc.exists) return;
-    const role = doc.data().role;
-    if (role === "student") {
-      if (!window.location.href.includes("student_dashboard.html"))
-        window.location.href = "student_dashboard.html";
-    } else if (role === "teacher") {
-      if (!window.location.href.includes("teacher_dashboard.html"))
-        window.location.href = "teacher_dashboard.html";
+      // Redirect based on role
+      if (user.role === "student") {
+        window.location.href = "/student_dashboard";
+      } else if (user.role === "teacher") {
+        window.location.href = "/teacher_dashboard";
+      } else {
+        document.getElementById("error-msg").innerText = "Unknown role!";
+      }
+
+    } catch (err) {
+      document.getElementById("error-msg").innerText = "Login error!";
+      console.error(err);
     }
+  });
+}
+
+// ------------------- Chat Functionality Hook -------------------
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
+const chatBox = document.getElementById("chat-box");
+
+if (chatForm) {
+  chatForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    // Display user message
+    chatBox.innerHTML += `<div class="user-msg">You: ${message}</div>`;
+    chatInput.value = "";
+
+    // Placeholder for OpenAI call (server-side)
+    try {
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
+      const data = await response.json();
+
+      chatBox.innerHTML += `<div class="ai-msg">AI: ${data.reply}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (err) {
+      chatBox.innerHTML += `<div class="ai-msg">AI: Error connecting to server.</div>`;
+    }
+  });
+}
+
+// ------------------- Optional UI Enhancements -------------------
+window.addEventListener("scroll", () => {
+  const header = document.querySelector(".header");
+  if (header) {
+    header.style.boxShadow = window.scrollY > 0 ? "0 4px 10px rgba(0,0,0,0.2)" : "none";
   }
 });
