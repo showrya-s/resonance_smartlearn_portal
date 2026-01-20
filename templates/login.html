@@ -5,33 +5,74 @@
   <title>Resonance Portal Login</title>
   <link rel="stylesheet" href="/static/style.css">
 
-  <!-- Firebase Script -->
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-analytics.js";
 
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abcdef"
+      apiKey: "AIzaSyApDMmuJhsTuzlfK0zxZZbl1VEjdPp4FM8",
+      authDomain: "resonance-portal.firebaseapp.com",
+      projectId: "resonance-portal",
+      storageBucket: "resonance-portal.firebasestorage.app",
+      messagingSenderId: "955977806009",
+      appId: "1:955977806009:web:ceb858298b16475747ab68",
+      measurementId: "G-Z599TEBV6R"
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    const analytics = getAnalytics(app);
   </script>
 
   <style>
-    body { font-family: Arial; background: #f0f4f7; margin:0; padding:0; }
-    .header { position: sticky; top:0; background:#fff; padding:15px; display:flex; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); z-index:10;}
+    /* General */
+    body { font-family: 'Poppins', sans-serif; background: linear-gradient(145deg,#eef6f8,#dfeef5); margin:0; padding:0; }
+    * { box-sizing:border-box; }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top:0;
+      display:flex;
+      align-items:center;
+      background:#fff;
+      padding:15px 25px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+      z-index:1000;
+    }
     .header img { height:50px; margin-right:15px; }
-    .login-box { width:350px; margin:100px auto; background:#fff; padding:30px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-    input, select, button { width:100%; margin:10px 0; padding:10px; border-radius:5px; border:1px solid #ccc; }
-    button { background:#007bff; color:#fff; border:none; cursor:pointer; }
+    .header h2 { color:#007bff; font-weight:700; }
+
+    /* Login Box */
+    .login-box {
+      width:400px;
+      max-width:90%;
+      margin:120px auto;
+      background:#fff;
+      padding:40px 30px;
+      border-radius:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.15);
+      transition:transform 0.3s;
+    }
+    .login-box:hover { transform: translateY(-5px); }
+
+    input, select, button {
+      width:100%;
+      margin:12px 0;
+      padding:12px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      font-size:1rem;
+    }
+    select { background:#f9f9f9; }
+    button { background:#007bff; color:#fff; border:none; cursor:pointer; transition:0.3s; }
     button:hover { background:#0056b3; }
-    .error { color:red; margin-bottom:10px; }
+
+    /* Error */
+    .error { color:red; font-weight:600; margin-bottom:10px; text-align:center; }
+
+    /* Footer */
+    .footer { text-align:center; margin-top:40px; color:#999; font-size:0.9rem; }
   </style>
 </head>
 <body>
@@ -44,15 +85,15 @@
     {% if error %}
     <div class="error">{{ error }}</div>
     {% endif %}
-    <input type="email" name="email" placeholder="Email" required>
+    <input type="text" name="username" placeholder="Username" required>
     <input type="password" name="password" placeholder="Password" required>
-
     <select name="role">
-      <option value="student">Student</option>
+      <option value="student">Student / Parent</option>
       <option value="teacher">Teacher</option>
     </select>
-
     <button type="submit">Login</button>
   </form>
+
+  <div class="footer">© 2026 Resonance Portal. All rights reserved.</div>
 </body>
 </html>
