@@ -1,35 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Profile</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8">
+  <title>Student Profile</title>
+  <link rel="stylesheet" href="/static/style.css">
+
+  <!-- Firebase Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+  </script>
+
+  <style>
+    body { font-family: Arial; background:#eef6f8; margin:0; padding:0; }
+    .header { position: sticky; top:0; background:#fff; padding:15px; display:flex; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); z-index:10;}
+    .header img { height:50px; margin-right:15px; }
+    .container { padding:20px; max-width:1200px; margin:auto; }
+    .card { background:#fff; padding:20px; margin-bottom:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.05); }
+    table { width:100%; border-collapse: collapse; }
+    table th, table td { padding:12px; border-bottom:1px solid #ccc; text-align:left; }
+  </style>
 </head>
 <body>
+  <div class="header">
+    <img src="/static/logo.png" alt="Logo">
+    <h2>{{ student.name }} Profile</h2>
+    <a href="/teacher_dashboard" style="margin-left:auto;color:#007bff;">Back</a>
+  </div>
 
-<div class="header">
-    <img src="/static/logo.png">
-    <div class="nav">
-        <a href="/student">Dashboard</a>
-        <a href="/logout">Logout</a>
-    </div>
-</div>
-
-<div class="container">
-
+  <div class="container">
     <div class="card">
-        <h2>Student Profile</h2>
-        <p><b>Name:</b> Demo Student</p>
-        <p><b>Class:</b> 10-A</p>
-        <p><b>Roll No:</b> 23</p>
+      <h3>Details</h3>
+      <p><strong>Class:</strong> {{ student.class }} - {{ student.section }}</p>
+      <p><strong>Attendance:</strong> {{ student.attendance }}%</p>
     </div>
 
     <div class="card">
-        <h3>Academic Summary</h3>
-        <p>Performance Level: Improving 📈</p>
+      <h3>Performance</h3>
+      <table>
+        <tr><th>Subject</th><th>Level</th></tr>
+        {% for subject, level in performance.items() %}
+        <tr><td>{{ subject }}</td><td>{{ level }}</td></tr>
+        {% endfor %}
+      </table>
     </div>
-
-    <div class="spacer"></div>
-</div>
-
+  </div>
 </body>
 </html>
