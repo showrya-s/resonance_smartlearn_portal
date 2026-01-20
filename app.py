@@ -1,11 +1,9 @@
 import os
-from flask import Flask, render_template, request, redirect, session
 import sqlite3
-from dotenv import load_dotenv
+from flask import Flask, render_template, request, redirect, session
 import openai
 
-# ------------------ LOAD ENV ------------------
-load_dotenv()
+# ------------------ OPENAI CONFIG ------------------
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 # ------------------ FLASK SETUP ------------------
@@ -13,8 +11,12 @@ app = Flask(__name__)
 app.secret_key = "resonance_secret_key"
 
 # ------------------ DATABASE CONNECTION ------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "database.db")
+
 def get_db():
-    return sqlite3.connect("database.db")
+    return sqlite3.connect(DB_PATH)
+
 
 # ------------------ DATABASE INIT ------------------
 @app.route("/init_db")
@@ -208,3 +210,4 @@ def logout():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+
