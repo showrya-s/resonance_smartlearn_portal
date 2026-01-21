@@ -29,18 +29,17 @@ if (loginForm) {
 
     try {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
-      const uid = userCred.user.uid;
-
       const snap = await getDoc(doc(db, "users", email));
       const role = snap.exists() ? snap.data().role : "student";
 
       await fetch("/set-session", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, role })
       });
 
-      window.location.href = "/student";
+      // Redirect based on role
+      window.location.href = "/dashboard";
     } catch (err) {
       alert("Login failed: " + err.message);
     }
@@ -59,18 +58,22 @@ if (chatForm) {
     const msg = chatInput.value.trim();
     if (!msg) return;
 
-    chatBox.innerHTML += `<div class="msg user">🧑 ${msg}</div>`;
+    chatBox.innerHTML += `<div class="user-msg">🧑 ${msg}</div>`;
     chatInput.value = "";
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    const res = await fetch("/chat", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ message: msg })
-    });
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+      });
 
-    const data = await res.json();
-    chatBox.innerHTML += `<div class="msg ai">🤖 ${data.reply}</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
+      const data = await res.json();
+      chatBox.innerHTML += `<div class="ai-msg">🤖 ${data.reply}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (err) {
+      chatBox.innerHTML += `<div class="ai-msg">⚠️ Error: ${err.message}</div>`;
+    }
   });
 }
