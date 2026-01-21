@@ -1,42 +1,55 @@
 import os
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from openai import OpenAI
 
 # ------------------ FLASK SETUP ------------------
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret")  # set in Render ENV
 
 # ------------------ OPENAI SETUP ------------------
-# IMPORTANT: API key must be set in Render ENV VARIABLES
-# Key name: OPENAI_API_KEY
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+api_key = os.environ.get("OPENAI_API_KEY")
+if not api_key:
+    raise RuntimeError("OPENAI_API_KEY not set in environment variables")
 
-# ------------------ BASIC ROUTES ------------------
+client = OpenAI(api_key=api_key)
 
-@app.route("/")
+# ------------------ ROUTES ------------------
+
+@app.route("/login")
 def login():
-    # Login handled by Firebase in frontend
     return render_template("login.html")
 
-
-@app.route("/student")
+@app.route("/student_dashboard")
 def student_dashboard():
     return render_template("student_dashboard.html")
 
-
-@app.route("/teacher")
+@app.route("/teacher_dashboard")
 def teacher_dashboard():
     return render_template("teacher_dashboard.html")
 
-
-@app.route("/profile")
+@app.route("/student_profile")
 def student_profile():
     return render_template("student_profile.html")
-
 
 @app.route("/chat")
 def chat_page():
     return render_template("chat.html")
 
+# ------------------ SESSION HANDLING ------------------
+
+@app.route("/set-session", methods=["POST"])
+def set_session():
+    data = request.json
+    session["email"] = data.get("email")
+    session["role"] = data.get("role", "student")
+    return jsonify({"status": "ok"})
+
+@app.route("/dashboard")
+def dashboard():
+    role = session.get("role", "student")
+    if role == "teacher":
+        return redirect(url_for("teacher_dashboard"))
+    return redirect(url_for("student_dashboard"))
 
 # ------------------ AI CHAT API ------------------
 
@@ -75,8 +88,7 @@ def ai_chat():
             "error": str(e)
         }), 500
 
-
 # ------------------ RUN ------------------
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)  # disable debug in production
