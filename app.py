@@ -2,44 +2,59 @@ import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from openai import OpenAI
 
-# ------------------ FLASK SETUP ------------------
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret")  # set in Render ENV
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret")
 
-# ------------------ OPENAI SETUP ------------------
-api_key = os.environ.get("OPENAI_API_KEY")
-if not api_key:
-    raise RuntimeError("OPENAI_API_KEY not set in environment variables")
+# OpenAI client (Render env var)
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-client = OpenAI(api_key=api_key)
-
-# ------------------ ROUTES ------------------
+# ---------------- ROUTES RENDERING SINGLE TEMPLATE ----------------
 
 @app.route("/login")
 def login():
-    return render_template("login.html")
+    return render_template("base.html", page="login", page_title="Login")
 
 @app.route("/student_dashboard")
 def student_dashboard():
-    return render_template("student_dashboard.html")
-
-@app.route("/teacher_dashboard")
-def teacher_dashboard():
-    return render_template("teacher_dashboard.html")
+    # Example server-side data (replace with real DB data)
+    student = {"class": "10", "section": "A", "roll": "1", "attendance": 95}
+    performance = [
+        ("Math", "Prodigy"),
+        ("Science", "Prodigy"),
+        ("English", "Average"),
+        ("Social Science", "Average"),
+        ("Language", "Prodigy"),
+    ]
+    remarks = {
+        "teacher_remark": "Keep up the good work in Math and Science. Focus on English grammar.",
+        "ai_remark": "Strong performance in Math and Science. Maintain practice for weak areas in English."
+    }
+    return render_template(
+        "base.html",
+        page="student_dashboard",
+        page_title="Student Dashboard",
+        student=student,
+        performance=performance,
+        remarks=remarks
+    )
 
 @app.route("/student_profile")
 def student_profile():
-    return render_template("student_profile.html")
+    return render_template("base.html", page="student_profile", page_title="Student Profile")
+
+@app.route("/teacher_dashboard")
+def teacher_dashboard():
+    return render_template("base.html", page="teacher_dashboard", page_title="Teacher Dashboard")
 
 @app.route("/chat")
 def chat_page():
-    return render_template("chat.html")
+    return render_template("base.html", page="chat", page_title="AI Chat")
 
-# ------------------ SESSION HANDLING ------------------
+# ---------------- SESSION HANDLING ----------------
 
 @app.route("/set-session", methods=["POST"])
 def set_session():
-    data = request.json
+    data = request.json or {}
     session["email"] = data.get("email")
     session["role"] = data.get("role", "student")
     return jsonify({"status": "ok"})
@@ -51,13 +66,12 @@ def dashboard():
         return redirect(url_for("teacher_dashboard"))
     return redirect(url_for("student_dashboard"))
 
-# ------------------ AI CHAT API ------------------
+# ---------------- AI CHAT API ----------------
 
 @app.route("/api/chat", methods=["POST"])
 def ai_chat():
-    data = request.json
+    data = request.json or {}
     user_message = data.get("message", "").strip()
-
     if not user_message:
         return jsonify({"reply": "Please ask a question."})
 
@@ -70,7 +84,7 @@ def ai_chat():
                     "content": (
                         "You are a helpful academic tutor for school students. "
                         "Explain concepts clearly with steps, formulas, and examples. "
-                        "Do not give shortcuts or answers directly. Teach methods."
+                        "Focus on teaching methods, not just answers."
                     )
                 },
                 {"role": "user", "content": user_message}
@@ -78,17 +92,19 @@ def ai_chat():
             temperature=0.6,
             max_tokens=400
         )
-
         ai_reply = response.choices[0].message.content
         return jsonify({"reply": ai_reply})
-
     except Exception as e:
-        return jsonify({
-            "reply": "🤖 AI Error. Check API key or billing.",
-            "error": str(e)
-        }), 500
+        return jsonify({"reply": "AI error occurred.", "error": str(e)}), 500
 
-# ------------------ RUN ------------------
+# ---------------- ROOT REDIRECT ----------------
+
+@app.route("/")
+def root():
+    # If session exists, go to dashboard; else go to login
+    if session.get("email"):
+        return redirect(url_for("dashboard"))
+    return redirect(url_for("login"))
 
 if __name__ == "__main__":
-    app.run(debug=False)  # disable debug in production
+    app.run(debug=False)
