@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ page_title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ==================== GLOBAL STYLES ==================== -->
+  <link rel="stylesheet" href="/static/style.css">
+
+  <!-- ==================== FIREBASE SDK ==================== -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+
+  <!-- ==================== PORTAL SCRIPT ==================== -->
+  <script type="module" src="/static/style.js"></script>
+
+  <style>
+    /* Inline minimal overrides to complement static/style.css if needed */
+    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .table-wrapper { overflow-x: auto; }
+    .button { display:inline-block; padding:10px 18px; background:#0066ff; color:#fff; border-radius:8px; text-decoration:none; transition:0.3s; }
+    .button:hover { background:#004ecc; }
+    .profile-photo { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #0066ff; margin-bottom: 15px; }
+    .profile-card { background:#fff; padding:20px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.1); margin-bottom:20px; text-align:center; }
+    .performance-summary .card { display:inline-block; width: calc(20% - 20px); margin:10px; vertical-align:top; }
+    .students-table table { width:100%; border-collapse: collapse; }
+    .students-table th, .students-table td { padding:12px; border:1px solid #ccc; text-align:center; }
+    .students-table th { background: linear-gradient(45deg, #0066ff, #00ccff); color:#fff; }
+    .nav a { margin: 0 8px; color: #fff; }
+    .header nav a { color: #fff; }
+    .card h4 { margin-bottom: 8px; }
+    .upcoming-tasks ul { list-style: disc; padding-left: 20px; }
+    .chat-page { max-width: 800px; margin: 20px auto; }
+    .chat-box { border: 1px solid #ccc; border-radius: 8px; padding: 10px; background: #f7faff; height: 400px; overflow-y: auto; }
+    .user-msg, .ai-msg { padding: 10px; border-radius: 8px; margin: 6px 0; width: fit-content; max-width: 70%; }
+    .user-msg { background: #cce5ff; margin-left: auto; }
+    .ai-msg { background: #e2ffe2; margin-right: auto; }
+    .chat-form { display: flex; gap: 10px; margin-top: 10px; }
+    .chat-form input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
+    .chat-form button { padding: 10px 20px; border-radius: 6px; border: none; background: #0066ff; color: #fff; }
+    .chat-form button:hover { background: #004ecc; }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="header">
+    <img src="/static/logo.png" alt="Logo">
+    <h2>Resonance Portal</h2>
+    <nav class="nav">
+      <a href="/login">Login</a>
+      <a href="/student_dashboard">Student Dashboard</a>
+      <a href="/teacher_dashboard">Teacher Dashboard</a>
+      <a href="/student_profile">Profile</a>
+      <a href="/chat">AI Chat</a>
+      <a href="/">Logout</a>
+    </nav>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main>
+
+    {% if page == "login" %}
+    <!-- ==================== LOGIN PAGE ==================== -->
+    <section class="login-box">
+      <form id="login-form">
+        <input type="email" name="email" placeholder="Email" required aria-label="Email">
+        <input type="password" name="password" placeholder="Password" required aria-label="Password">
+        <button type="submit" aria-label="Login">Login</button>
+      </form>
+      <div class="footer">© 2026 Resonance Portal. All rights reserved.</div>
+    </section>
+    {% endif %}
+
+    {% if page == "student_dashboard" %}
+    <!-- ==================== STUDENT DASHBOARD ==================== -->
+    <div class="container">
+      <div class="card">
+        <h3>Profile</h3>
+        <p><strong>Class:</strong> {{ student.class }} - {{ student.section }}</p>
+        <p><strong>Roll:</strong> {{ student.roll }}</p>
+        <p><strong>Attendance:</strong> {{ student.attendance }}%</p>
+      </div>
+
+      <div class="card">
+        <h3>Performance</h3>
+        <div class="table-wrapper">
+          <table>
+            <tr><th>Subject</th><th>Level</th></tr>
+            {% for sub, level in performance %}
+            <tr><td>{{ sub }}</td><td>{{ level }}</td></tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Remarks</h3>
+        <p><strong>Teacher:</strong> {{ remarks.teacher_remark }}</p>
+        <p><strong>AI:</strong> {{ remarks.ai_remark }}</p>
+      </div>
+
+      <div class="card">
+        <a href="/chat" class="button">Go to AI Chat</a>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if page == "student_profile" %}
+    <!-- ==================== STUDENT PROFILE ==================== -->
+    <div class="container">
+
+      <!-- Header -->
+      <div class="header">
+        <img src="/static/logo.png" alt="Logo">
+        <h2>Student Profile</h2>
+        <div class="nav">
+          <a href="/student_dashboard">Dashboard</a>
+          <a href="/chat">AI Chat</a>
+          <a href="/">Logout</a>
+        </div>
+      </div>
+
+      <!-- Profile Overview -->
+      <section class="profile-overview">
+        <div class="profile-card">
+          <img src="/static/logo.png" alt="Profile Photo" class="profile-photo">
+          <h3>Riya Sharma</h3>
+          <p>Class: 10 | Section: A | Roll: 1</p>
+          <p>Attendance: 95%</p>
+        </div>
+
+        <div class="performance-summary">
+          <h3>Subject Performance</h3>
+          <div class="card">
+            <h4>Math</h4>
+            <p>Level: Prodigy</p>
+            <p>Marks: 95/100</p>
+          </div>
+          <div class="card">
+            <h4>Science</h4>
+            <p>Level: Prodigy</p>
+            <p>Marks: 92/100</p>
+          </div>
+          <div class="card">
+            <h4>English</h4>
+            <p>Level: Average</p>
+            <p>Marks: 85/100</p>
+          </div>
+          <div class="card">
+            <h4>Social Science</h4>
+            <p>Level: Average</p>
+            <p>Marks: 88/100</p>
+          </div>
+          <div class="card">
+            <h4>Language</h4>
+            <p>Level: Prodigy</p>
+            <p>Marks: 93/100</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Teacher Remarks -->
+      <section class="teacher-remarks">
+        <h3>Teacher Remarks</h3>
+        <div class="card">
+          <p>Keep up the good work in Math and Science. Focus on English grammar.</p>
+        </div>
+        <div class="card">
+          <p>Participates actively in class. Review Social Science chapters regularly.</p>
+        </div>
+      </section>
+
+      <!-- AI Analysis -->
+      <section class="ai-remarks">
+        <h3>AI Analysis</h3>
+        <div class="card">
+          <p>Strong performance in Math and Science. Maintain practice for weak areas in English.</p>
+        </div>
+      </section>
+
+      <!-- Attendance Trends -->
+      <section class="attendance-trends">
+        <h3>Attendance Trends</h3>
+        <div class="card">
+          <p>January: 100%</p>
+          <p>February: 95%</p>
+          <p>March: 92%</p>
+          <p>April: 97%</p>
+          <p>May: 95%</p>
+        </div>
+      </section>
+
+      <!-- Study Resources -->
+      <section class="study-resources">
+        <h3>Quick Study Resources</h3>
+        <div class="card">Formulas Sheet PDF</div>
+        <div class="card">Science Notes PDF</div>
+        <div class="card">Previous Year Papers</div>
+        <div class="card">Video Tutorials</div>
+        <div class="card">Mind Maps & Flashcards</div>
+        <div class="card">Interactive Quizzes</div>
+        <div class="card">Exam Strategies</div>
+        <div class="card">Important Definitions</div>
+        <div class="card">Tips from Toppers</div>
+        <div class="card">Extra Practice Exercises</div>
+      </section>
+
+      <!-- Extracurricular -->
+      <section class="extracurricular">
+        <h3>Achievements & Activities</h3>
+        <div class="card">Math Olympiad 2025 - Gold</div>
+        <div class="card">Science Fair 2025 - 2nd Place</div>
+        <div class="card">Debate Competition 2025 - Participant</div>
+        <div class="card">School Football Team Captain</div>
+        <div class="card">Art Exhibition - Winner</div>
+      </section>
+
+      <!-- Upcoming Tasks -->
+      <section class="upcoming-tasks">
+        <h3>Upcoming Homework & Tasks</h3>
+        <ul>
+          <li>Math Assignment Chapter 7 - Due: 25 Jan</li>
+          <li>Science Project on Motion - Due: 28 Jan</li>
+          <li>English Essay on Environment - Due: 30 Jan</li>
+          <li>Social Science Map Work - Due: 26 Jan</li>
+          <li>Language Practice Sheet - Due: 27 Jan</li>
+        </ul>
+      </section>
+
+    </div>
+    {% endif %}
+
+    {% if page == "teacher_dashboard" %}
+    <!-- ==================== TEACHER DASHBOARD ==================== -->
+    <div class="container">
+
+      <div class="header">
+        <img src="/static/logo.png" alt="Logo">
+        <h2>Teacher Dashboard</h2>
+        <div class="nav">
+          <a href="/">Logout</a>
+          <a href="/chat">AI Chat</a>
+        </div>
+      </div>
+
+      <section class="overview-cards card-group">
+        <div class="card card-primary shadow-sm">
+          <h3>Total Students</h3>
+          <p>120</p>
+        </div>
+        <div class="card card-warning shadow-sm">
+          <h3>Pending Remarks</h3>
+          <p>15</p>
+        </div>
+        <div class="card card-success shadow-sm">
+          <h3>Average Attendance</h3>
+          <p>92%</p>
+        </div>
+        <div class="card card-secondary shadow-sm">
+          <h3>Top Performer</h3>
+          <p>Riya Sharma</p>
+        </div>
+      </section>
+
+      <section class="students-table">
+        <h3>Students Overview</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Roll</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Attendance</th>
+              <th>Performance Level</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Riya Sharma</td>
+              <td>10</td>
+              <td>A</td>
+              <td>95%</td>
+              <td>Prodigy</td>
+              <td><button class="button">View Profile</button></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Amit Verma</td>
+              <td>10</td>
+              <td>A</td>
+              <td>88%</td>
+              <td>Average</td>
+              <td><button class="button">View Profile</button></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Neha Gupta</td>
+              <td>10</td>
+              <td>B</td>
+              <td>80%</td>
+              <td>Improver</td>
+              <td><button class="button">View Profile</button></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Rahul Singh</td>
+              <td>10</td>
+              <td>B</td>
+              <td>97%</td>
+              <td>Prodigy</td>
+              <td><button class="button">View Profile</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="filters-panel card">
+        <h3>Filter Students</h3>
+        <div class="filter">
+          <label for="class">Class:</label>
+          <select id="class">
+            <option>All</option>
+            <option>9</option>
+            <option>10</option>
+            <option>11</option>
+            <option>12</option>
+          </select>
+        </div>
+        <div class="filter">
+          <label for="section">Section:</label>
+          <select id="section">
+            <option>All</option>
+            <option>A</option>
+            <option>B</option>
+            <option>C</option>
+          </select>
+        </div>
+        <div class="filter">
+          <label for="performance">Performance:</label>
+          <select id="performance">
+            <option>All</option>
+            <option>Prodigy</option>
+            <option>Average</option>
+            <option>Improver</option>
+          </select>
+        </div>
+        <button class="button">Apply Filters</button>
+      </section>
+
+      <section class="remarks-panel">
+        <h3>Pending Teacher Remarks</h3>
+        <div class="card">
+          <p>Student: Neha Gupta</p>
+          <textarea placeholder="Add remark here"></textarea>
+          <button class="button">Submit</button>
+        </div>
+        <div class="card">
+          <p>Student: Amit Verma</p>
+          <textarea placeholder="Add remark here"></textarea>
+          <button class="button">Submit</button>
+        </div>
+      </section>
+
+      <section class="analytics-cards card-group">
+        <div class="card">
+          <h4>Math Average</h4>
+          <p>78%</p>
+        </div>
+        <div class="card">
+          <h4>Science Average</h4>
+          <p>85%</p>
+        </div>
+        <div class="card">
+          <h4>English Average</h4>
+          <p>88%</p>
+        </div>
+        <div class="card">
+          <h4>Social Science Avg</h4>
+          <p>81%</p>
+        </div>
+        <div class="card">
+          <h4>Language Average</h4>
+          <p>90%</p>
+        </div>
+      </section>
+
+      <section class="additional-resources">
+        <h3>Teacher Tools</h3>
+        <div class="card">Upload Study Material</div>
+        <div class="card">Export Performance Reports</div>
+        <div class="card">View Homework Submissions</div>
+        <div class="card">Send Notifications</div>
+        <div class="card">Manage Students</div>
+      </section>
+
+    </div>
+    {% endif %}
+
+    {% if page == "chat" %}
+    <!-- ==================== CHAT PAGE ==================== -->
+    <div class="container chat-page">
+      <div class="header">
+        <img src="/static/logo.png" alt="Logo">
+        <h2>AI Chat</h2>
+        <div class="nav">
+          <a href="/student_dashboard">Dashboard</a>
+          <a href="/student_profile">Profile</a>
+          <a href="/">Logout</a>
+        </div>
+      </div>
+
+      <div id="chat-box" class="chat-box" aria-live="polite" aria-label="Chat history"></div>
+
+      <form id="chat-form" class="chat-form" aria-label="Chat input form">
+        <input type="text" id="chat-input" placeholder="Ask your AI..." required aria-label="Message input">
+        <button type="submit" aria-label="Send message">Send</button>
+      </form>
+    </div>
+    {% endif %}
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer">
+    &copy; 2026 Resonance Portal. All rights reserved.
+  </footer>
+
+  <!-- ==================== OPTIONAL: ACCESSIBILITY HELPERS ==================== -->
+  <script>
+    // Simple focus management for accessibility
+    (function() {
+      const main = document.querySelector('main');
+      if (main) main.setAttribute('tabindex', '-1');
+      window.addEventListener('load', () => {
+        if (main) main.focus();
+      });
+    })();
+  </script>
+
+  <!-- ==================== OPTIONAL: SMOOTH SCROLL ==================== -->
+  <script>
+    (function() {
+      const links = document.querySelectorAll('a[href^="#"]');
+      for (const link of links) {
+        link.addEventListener('click', function(e) {
+          const targetId = this.getAttribute('href').substring(1);
+          const target = document.getElementById(targetId);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
+    })();
+  </script>
+
+  <!-- ==================== OPTIONAL: TABLE SORT (TEACHER DASHBOARD) ==================== -->
+  <script>
+    (function() {
+      const table = document.querySelector('.students-table table');
+      if (!table) return;
+
+      function sortTableByColumn(table, column, asc = true) {
+        const dirModifier = asc ? 1 : -1;
+        const tBody = table.tBodies[0];
+        const rows = Array.from(tBody.querySelectorAll('tr'));
+
+        const sortedRows = rows.sort((a, b) => {
+          const aColText = a.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
+          const bColText = b.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
+
+          // Numeric sort if both are numbers
+          const aNum = parseFloat(aColText.replace('%',''));
+          const bNum = parseFloat(bColText.replace('%',''));
+          if (!isNaN(aNum) && !isNaN(bNum)) {
+            return (aNum - bNum) * dirModifier;
+          }
+          return aColText > bColText ? (1 * dirModifier) : (-1 * dirModifier);
+        });
+
+        while (tBody.firstChild) {
+          tBody.removeChild(tBody.firstChild);
+        }
+        tBody.append(...sortedRows);
+      }
+
+      const headers = table.querySelectorAll('th');
+      headers.forEach((header, index) => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', () => {
+          const currentIsAscending = header.classList.contains('th-sort-asc');
+          headers.forEach(h => h.classList.remove('th-sort-asc', 'th-sort-desc'));
+          header.classList.toggle('th-sort-asc', !currentIsAscending);
+          header.classList.toggle('th-sort-desc', currentIsAscending);
+          sortTableByColumn(table, index, !currentIsAscending);
+        });
+      });
+    })();
+  </script>
+
+  <!-- ==================== OPTIONAL: FILTERS (TEACHER DASHBOARD) ==================== -->
+  <script>
+    (function() {
+      const classSelect = document.getElementById('class');
+      const sectionSelect = document.getElementById('section');
+      const perfSelect = document.getElementById('performance');
+      const applyBtn = document.querySelector('.filters-panel .button');
+      const rows = document.querySelectorAll('.students-table tbody tr');
+
+      if (!classSelect || !sectionSelect || !perfSelect || !applyBtn || rows.length === 0) return;
+
+      function matches(row, cls, sec, perf) {
+        const rClass = row.children[2].textContent.trim();
+        const rSection = row.children[3].textContent.trim();
+        const rPerf = row.children[5].textContent.trim();
+
+        const classOk = (cls === 'All' || rClass === cls);
+        const sectionOk = (sec === 'All' || rSection === sec);
+        const perfOk = (perf === 'All' || rPerf === perf);
+        return classOk && sectionOk && perfOk;
+      }
+
+      applyBtn.addEventListener('click', () => {
+        const cls = classSelect.value;
+        const sec = sectionSelect.value;
+        const perf = perfSelect.value;
+        rows.forEach(row => {
+          row.style.display = matches(row, cls, sec, perf) ? '' : 'none';
+        });
+      });
+    })();
+  </script>
+
+  <!-- ==================== OPTIONAL: SAVE REMARKS (TEACHER DASHBOARD) ==================== -->
+  <script>
+    (function() {
+      const remarkCards = document.querySelectorAll('.remarks-panel .card');
+      remarkCards.forEach(card => {
+        const btn = card.querySelector('button');
+        const ta = card.querySelector('textarea');
+        if (!btn || !ta) return;
+        btn.addEventListener('click', async () => {
+          const studentLine = card.querySelector('p')?.textContent || '';
+          const studentName = studentLine.replace('Student:', '').trim();
+          const remark = ta.value.trim();
+          if (!remark) {
+            alert('Please enter a remark before submitting.');
+            return;
+          }
+          // Placeholder: send to backend if needed
+          // await fetch('/api/teacher/remark', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ studentName, remark }) });
+          ta.value = '';
+          btn.textContent = 'Submitted';
+          btn.disabled = true;
+          setTimeout(() => {
+            btn.textContent = 'Submit';
+            btn.disabled = false;
+          }, 2000);
+        });
+      });
+    })();
+  </script>
+
+  <!-- ==================== OPTIONAL: PROFILE INTERACTIONS ==================== -->
+  <script>
+    (function() {
+      const cards = document.querySelectorAll('.performance-summary .card');
+      cards.forEach(card => {
+        card.addEventListener('mouseenter', () => card.classList.add('shadow-hover'));
+        card.addEventListener('mouseleave', () => card.classList.remove('shadow-hover'));
+      });
+    })();
+  </script>
+
+  <!-- ==================== OPTIONAL: CHAT UX ENHANCEMENTS ==================== -->
+  <script>
+    (function() {
+      const chatBox = document.getElementById('chat-box');
+      const chatInput = document.getElementById('chat-input');
+      const chatForm = document.getElementById('chat-form');
+
+      if (!chatBox || !chatInput || !chatForm) return;
+
+      // Enter to send
+      chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          chatForm.dispatchEvent(new Event('submit'));
+        }
+      });
+
+      // Auto-scroll on new messages
+      const observer = new MutationObserver(() => {
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+      observer.observe(chatBox, { childList: true });
+    })();
+  </script>
+
+</body>
+</html>
