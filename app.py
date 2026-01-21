@@ -1,22 +1,30 @@
 import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from openai import OpenAI
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret")
 
-# OpenAI client (Render env var)
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-# ---------------- ROUTES RENDERING SINGLE TEMPLATE ----------------
+# ---------------- LOGIN REQUIRED DECORATOR ----------------
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "email" not in session:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
 
+# ---------------- ROUTES ----------------
 @app.route("/login")
 def login():
     return render_template("base.html", page="login", page_title="Login")
 
 @app.route("/student_dashboard")
+@login_required
 def student_dashboard():
-    # Example server-side data (replace with real DB data)
     student = {"class": "10", "section": "A", "roll": "1", "attendance": 95}
     performance = [
         ("Math", "Prodigy"),
@@ -38,20 +46,22 @@ def student_dashboard():
         remarks=remarks
     )
 
-@app.route("/student_profile")
-def student_profile():
-    return render_template("base.html", page="student_profile", page_title="Student Profile")
-
 @app.route("/teacher_dashboard")
+@login_required
 def teacher_dashboard():
     return render_template("base.html", page="teacher_dashboard", page_title="Teacher Dashboard")
 
+@app.route("/student_profile")
+@login_required
+def student_profile():
+    return render_template("base.html", page="student_profile", page_title="Student Profile")
+
 @app.route("/chat")
+@login_required
 def chat_page():
     return render_template("base.html", page="chat", page_title="AI Chat")
 
 # ---------------- SESSION HANDLING ----------------
-
 @app.route("/set-session", methods=["POST"])
 def set_session():
     data = request.json or {}
@@ -60,15 +70,21 @@ def set_session():
     return jsonify({"status": "ok"})
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
     role = session.get("role", "student")
     if role == "teacher":
         return redirect(url_for("teacher_dashboard"))
     return redirect(url_for("student_dashboard"))
 
-# ---------------- AI CHAT API ----------------
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
+# ---------------- AI CHAT API ----------------
 @app.route("/api/chat", methods=["POST"])
+@login_required
 def ai_chat():
     data = request.json or {}
     user_message = data.get("message", "").strip()
@@ -97,11 +113,9 @@ def ai_chat():
     except Exception as e:
         return jsonify({"reply": "AI error occurred.", "error": str(e)}), 500
 
-# ---------------- ROOT REDIRECT ----------------
-
+# ---------------- ROOT ----------------
 @app.route("/")
 def root():
-    # If session exists, go to dashboard; else go to login
     if session.get("email"):
         return redirect(url_for("dashboard"))
     return redirect(url_for("login"))
