@@ -22,6 +22,21 @@ def login_required(f):
 def login():
     return render_template("base.html", page="login", page_title="Login")
 
+@app.route("/set-session", methods=["POST"])
+def set_session():
+    data = request.json or {}
+    session["email"] = data.get("email")
+    session["role"] = data.get("role", "student")
+    return jsonify({"status": "ok"})
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    role = session.get("role", "student")
+    if role == "teacher":
+        return redirect(url_for("teacher_dashboard"))
+    return redirect(url_for("student_dashboard"))
+
 @app.route("/student_dashboard")
 @login_required
 def student_dashboard():
@@ -37,14 +52,12 @@ def student_dashboard():
         "teacher_remark": "Keep up the good work in Math and Science. Focus on English grammar.",
         "ai_remark": "Strong performance in Math and Science. Maintain practice for weak areas in English."
     }
-    return render_template(
-        "base.html",
-        page="student_dashboard",
-        page_title="Student Dashboard",
-        student=student,
-        performance=performance,
-        remarks=remarks
-    )
+    return render_template("base.html",
+                           page="student_dashboard",
+                           page_title="Student Dashboard",
+                           student=student,
+                           performance=performance,
+                           remarks=remarks)
 
 @app.route("/teacher_dashboard")
 @login_required
@@ -61,28 +74,6 @@ def student_profile():
 def chat_page():
     return render_template("base.html", page="chat", page_title="AI Chat")
 
-# ---------------- SESSION HANDLING ----------------
-@app.route("/set-session", methods=["POST"])
-def set_session():
-    data = request.json or {}
-    session["email"] = data.get("email")
-    session["role"] = data.get("role", "student")
-    return jsonify({"status": "ok"})
-
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    role = session.get("role", "student")
-    if role == "teacher":
-        return redirect(url_for("teacher_dashboard"))
-    return redirect(url_for("student_dashboard"))
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("login"))
-
-# ---------------- AI CHAT API ----------------
 @app.route("/api/chat", methods=["POST"])
 @login_required
 def ai_chat():
@@ -113,7 +104,11 @@ def ai_chat():
     except Exception as e:
         return jsonify({"reply": "AI error occurred.", "error": str(e)}), 500
 
-# ---------------- ROOT ----------------
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
 @app.route("/")
 def root():
     if session.get("email"):
