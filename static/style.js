@@ -84,9 +84,21 @@ if (chatForm && chatBox && chatInput) {
         body: JSON.stringify({ message: msg })
       });
 
-      const data = await res.json();
-      const reply = data.reply ? sanitize(data.reply) : "No reply.";
-      safeAppend(chatBox, `<div class="ai-msg">🤖 ${reply}</div>`);
+   const data = await res.json();
+
+// Parse Markdown into HTML
+const parsedReply = data.reply ? marked.parse(data.reply) : "No reply.";
+
+// Append to chat box
+chatBox.innerHTML += `<div class="ai-msg">🤖 ${parsedReply}</div>`;
+
+// Trigger MathJax to render formulas
+if (window.MathJax) {
+  MathJax.typesetPromise();
+}
+
+chatBox.scrollTop = chatBox.scrollHeight;
+
     } catch (err) {
       safeAppend(chatBox, `<div class="ai-msg">⚠️ Error: ${sanitize(err.message)}</div>`);
     }
